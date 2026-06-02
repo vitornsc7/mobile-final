@@ -1,4 +1,23 @@
 {
-  "despesas": [],
-  "limitesMensais": []
+  "despesas": [
+    {
+      "id": "132c3a2d-87e0-423a-b142-0f0b3cf9a9da",
+      "usuarioId": "demo-user",
+      "descricao": "Viagem",
+      "valor": 450,
+      "mesReferencia": "2026-06",
+      "criadoEm": "2026-06-02T19:21:29.039Z",
+      "atualizadoEm": "2026-06-02T19:21:29.039Z"
+    }
+  ],
+  "limitesMensais": [
+    {
+      "id": "6fcde351-e646-461e-9371-66b1a1b0641b",
+      "usuarioId": "demo-user",
+      "valor": 1000,
+      "mesReferencia": "2026-06",
+      "criadoEm": "2026-06-02T19:20:31.076Z",
+      "atualizadoEm": "2026-06-02T19:20:31.076Z"
+    }
+  ]
 }
