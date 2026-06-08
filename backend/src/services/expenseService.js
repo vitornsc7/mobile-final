@@ -3,8 +3,9 @@ const { lerBanco, escreverBanco } = require('../repositories/jsonDatabase');
 const { httpError } = require('../utils/errors');
 const { validarMesReferencia, mesReferenciaAnterior } = require('../utils/month');
 
-function validarDadosDespesa(dadosRecebidos) {
+function validarDadosDespesa(dadosRecebidos, opcoes = {}) {
   const { descricao, valor, mesReferencia } = dadosRecebidos;
+  const bloquearMesAnterior = opcoes.bloquearMesAnterior ?? true;
 
   if (!descricao || !descricao.trim()) {
     throw httpError(400, 'Descrição é obrigatória!');
@@ -22,7 +23,7 @@ function validarDadosDespesa(dadosRecebidos) {
     throw httpError(400, erroMes);
   }
 
-  if (mesReferenciaAnterior(mesReferencia)) {
+  if (bloquearMesAnterior && mesReferenciaAnterior(mesReferencia)) {
     throw httpError(400, 'Não é permitido criar ou alterar despesas de meses anteriores!');
   }
 
@@ -69,7 +70,7 @@ function criarDespesa(usuarioId, dadosRecebidos) {
 }
 
 function atualizarDespesa(usuarioId, despesaId, dadosRecebidos) {
-  const dadosValidados = validarDadosDespesa(dadosRecebidos);
+  const dadosValidados = validarDadosDespesa(dadosRecebidos, { bloquearMesAnterior: false });
   const banco = lerBanco();
   const indice = banco.despesas.findIndex((despesa) => despesa.id === despesaId && despesa.usuarioId === usuarioId);
 
@@ -78,10 +79,6 @@ function atualizarDespesa(usuarioId, despesaId, dadosRecebidos) {
   }
 
   const despesaAtual = banco.despesas[indice];
-
-  if (mesReferenciaAnterior(despesaAtual.mesReferencia)) {
-    throw httpError(400, 'Não é permitido alterar despesas de meses anteriores!');
-  }
 
   const despesaAtualizada = {
     ...despesaAtual,

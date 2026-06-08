@@ -3,8 +3,9 @@ const { lerBanco, escreverBanco } = require('../repositories/jsonDatabase');
 const { httpError } = require('../utils/errors');
 const { validarMesReferencia, mesReferenciaAnterior } = require('../utils/month');
 
-function validarDadosLimiteMensal(dadosRecebidos) {
+function validarDadosLimiteMensal(dadosRecebidos, opcoes = {}) {
   const { valor, mesReferencia } = dadosRecebidos;
+  const bloquearMesAnterior = opcoes.bloquearMesAnterior ?? true;
   const valorNumerico = Number(valor);
 
   if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) {
@@ -17,7 +18,7 @@ function validarDadosLimiteMensal(dadosRecebidos) {
     throw httpError(400, erroMes);
   }
 
-  if (mesReferenciaAnterior(mesReferencia)) {
+  if (bloquearMesAnterior && mesReferenciaAnterior(mesReferencia)) {
     throw httpError(400, 'Não é permitido criar ou alterar limites de meses anteriores!');
   }
 
@@ -51,7 +52,7 @@ function criarLimiteMensal(usuarioId, dadosRecebidos) {
   );
 
   if (limiteJaExiste) {
-    throw httpError(409, 'Já existe um limite cadastrado para este mês!');
+    throw httpError(409, 'Esse mês já possui um limite cadastrado. Você pode editar o limite existente.');
   }
 
   const agora = new Date().toISOString();
@@ -70,7 +71,7 @@ function criarLimiteMensal(usuarioId, dadosRecebidos) {
 }
 
 function atualizarLimiteMensal(usuarioId, limiteId, dadosRecebidos) {
-  const dadosValidados = validarDadosLimiteMensal(dadosRecebidos);
+  const dadosValidados = validarDadosLimiteMensal(dadosRecebidos, { bloquearMesAnterior: false });
   const banco = lerBanco();
   const indice = banco.limitesMensais.findIndex((limite) => limite.id === limiteId && limite.usuarioId === usuarioId);
 
@@ -80,16 +81,12 @@ function atualizarLimiteMensal(usuarioId, limiteId, dadosRecebidos) {
 
   const limiteAtual = banco.limitesMensais[indice];
 
-  if (mesReferenciaAnterior(limiteAtual.mesReferencia)) {
-    throw httpError(400, 'Não é permitido alterar limites de meses anteriores!');
-  }
-
   const mesDuplicado = banco.limitesMensais.some((limite) => {
     return limite.id !== limiteId && limite.usuarioId === usuarioId && limite.mesReferencia === dadosValidados.mesReferencia;
   });
 
   if (mesDuplicado) {
-    throw httpError(409, 'Já existe um limite cadastrado para este mês.');
+    throw httpError(409, 'Esse mês já possui um limite cadastrado. Você pode editar o limite existente.');
   }
 
   const limiteAtualizado = {

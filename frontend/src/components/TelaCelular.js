@@ -8,7 +8,12 @@ export function TelaCelular({ children, telaAtiva, aoTrocarTela }) {
     <SafeAreaView style={estilos.fundoAplicativo}>
       <StatusBar style="dark" />
       <View style={estilos.celular}>
-        <ScrollView contentContainerStyle={estilos.conteudoCelular} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={estilos.conteudoCelular}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        >
           {children}
         </ScrollView>
         <NavegacaoInferior telaAtiva={telaAtiva} aoTrocarTela={aoTrocarTela} />
