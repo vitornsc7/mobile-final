@@ -1,0 +1,40 @@
+{
+  "despesas": [
+    {
+      "id": "31f88d87-b37a-45cb-be14-586c4fbca8e7",
+      "usuarioId": "demo-user",
+      "descricao": "Mercado",
+      "valor": 100,
+      "mesReferencia": "2026-10",
+      "criadoEm": "2026-06-08T00:06:21.533Z",
+      "atualizadoEm": "2026-06-08T00:06:21.533Z"
+    },
+    {
+      "id": "458a8e82-2f8c-47d9-8188-35f4a0c2da5b",
+      "usuarioId": "demo-user",
+      "descricao": "Padaria",
+      "valor": 101,
+      "mesReferencia": "2026-06",
+      "criadoEm": "2026-06-08T00:14:15.038Z",
+      "atualizadoEm": "2026-06-08T00:14:15.038Z"
+    }
+  ],
+  "limitesMensais": [
+    {
+      "id": "ab9624af-50ac-4d00-bcc5-50e13793e835",
+      "usuarioId": "demo-user",
+      "valor": 250,
+      "mesReferencia": "2026-10",
+      "criadoEm": "2026-06-08T00:02:05.813Z",
+      "atualizadoEm": "2026-06-08T00:44:48.436Z"
+    },
+    {
+      "id": "f0be54c8-1d7e-45d5-8db4-e6ec5c110e1b",
+      "usuarioId": "demo-user",
+      "valor": 150,
+      "mesReferencia": "2026-06",
+      "criadoEm": "2026-06-08T00:18:58.148Z",
+      "atualizadoEm": "2026-06-08T00:18:58.148Z"
+    }
+  ]
+}

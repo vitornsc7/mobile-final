@@ -1,0 +1,16 @@
+export const CORES = {
+  fundo: '#f8fafc',
+  branco: '#ffffff',
+  verde: '#166534',
+  verdeEscuro: '#0f3d25',
+  verdeClaro: '#dcfce7',
+  verdeCard: '#5abb67',
+  roxo: '#7c3aed',
+  roxoEscuro: '#5b21b6',
+  roxoClaro: '#f0e9ff',
+  cinzaClaro: '#f8fafc',
+  cinzaMedio: '#e2e8f0',
+  texto: '#111827',
+  textoSuave: '#667085',
+  borda: '#d8dee8',
+};
