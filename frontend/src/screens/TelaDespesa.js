@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ChevronDown } from '../components/ChevronDown';
 import { Campo } from '../components/Campo';
@@ -29,6 +29,7 @@ export function TelaDespesa({
   const mesFormularioRotulo = formularioDespesa.mesReferencia
     ? formatarMesReferencia(formularioDespesa.mesReferencia, false)
     : '';
+  const totalHistorico = useMemo(() => despesas.reduce((total, despesa) => total + Number(despesa.valor), 0), [despesas]);
 
   function selecionarMesFormulario(mesReferencia) {
     aoAlterarFormulario('mesReferencia', mesReferencia);
@@ -41,9 +42,17 @@ export function TelaDespesa({
 
   return (
     <View style={estilos.telaFormulario}>
-      <Text style={estilos.tituloTela}>Despesa</Text>
+      <View style={estilos.cabecalhoTela}>
+        <Text style={estilos.eyebrow}>Lançamentos</Text>
+        <Text style={estilos.tituloTela}>Despesas</Text>
+        <Text style={estilos.subtituloTela}>Registre saídas e acompanhe o histórico mensal.</Text>
+      </View>
 
       <View style={estilos.cardFormulario}>
+        <View style={estilos.cabecalhoCard}>
+          <Text style={estilos.tituloCard}>{despesaEmEdicao ? 'Editar despesa' : 'Nova despesa'}</Text>
+          {despesaEmEdicao && <Text style={estilos.badgeEdicao}>Editando</Text>}
+        </View>
         <Campo
           rotulo="Descrição"
           valor={formularioDespesa.descricao}
@@ -71,11 +80,7 @@ export function TelaDespesa({
 
           {seletorMesFormularioAberto && (
             <View style={estilos.dropdownFormularioContainer}>
-              <ScrollView
-                style={estilos.dropdownScroll}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-              >
+              <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
                 {mesesDisponiveis.map((mes) => (
                   <Pressable
                     key={mes.valor}
@@ -101,7 +106,7 @@ export function TelaDespesa({
         </View>
 
         <Pressable style={estilos.botaoPrincipal} onPress={aoSalvar}>
-          <Text style={estilos.textoBotaoPrincipal}>{despesaEmEdicao ? 'Atualizar' : 'Salvar'}</Text>
+          <Text style={estilos.textoBotaoPrincipal}>{despesaEmEdicao ? 'Atualizar despesa' : 'Salvar despesa'}</Text>
         </Pressable>
         {despesaEmEdicao && (
           <Pressable style={estilos.botaoTexto} onPress={aoCancelarEdicao}>
@@ -110,7 +115,17 @@ export function TelaDespesa({
         )}
       </View>
 
-      <Text style={estilos.tituloSecao}>Histórico</Text>
+      <View style={estilos.cabecalhoHistorico}>
+        <View>
+          <Text style={estilos.tituloSecao}>Histórico</Text>
+          <Text style={estilos.subtituloSecao}>{despesas.length} registros no período</Text>
+        </View>
+        <View style={estilos.totalPill}>
+          <Text style={estilos.totalPillRotulo}>Total</Text>
+          <Text style={estilos.totalPillValor}>{formatarMoeda(totalHistorico)}</Text>
+        </View>
+      </View>
+
       <View style={estilos.buscaMes}>
         <Pressable
           style={[estilos.entradaSelecao, seletorMesAberto && estilos.entradaSelecaoAberta]}
@@ -127,11 +142,7 @@ export function TelaDespesa({
 
       {seletorMesAberto && (
         <View style={estilos.dropdownContainer}>
-          <ScrollView
-            style={estilos.dropdownScroll}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-          >
+          <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
             {mesesDisponiveis.map((mes) => (
               <Pressable
                 key={mes.valor}
@@ -148,22 +159,29 @@ export function TelaDespesa({
       )}
 
       {despesas.length === 0 ? (
-        <Text style={estilos.textoVazio}>Nenhuma despesa foi encontrada!</Text>
+        <View style={estilos.estadoVazio}>
+          <Text style={estilos.estadoVazioTitulo}>Nenhuma despesa encontrada</Text>
+          <Text style={estilos.estadoVazioTexto}>Selecione outro mês ou registre uma nova despesa.</Text>
+        </View>
       ) : (
         despesas.map((despesa) => (
           <View key={despesa.id} style={estilos.linhaHistorico}>
+            <View style={estilos.iconeDespesa}>
+              <Text style={estilos.iconeDespesaTexto}>-</Text>
+            </View>
             <View style={estilos.principalHistorico}>
               <Text style={estilos.tituloHistorico}>{despesa.descricao}</Text>
-              <Text style={estilos.valorHistorico}>{formatarMoeda(despesa.valor)}</Text>
+              <Text style={estilos.subtituloHistorico}>{despesa.mesReferencia}</Text>
+              <View style={estilos.acoesHistorico}>
+                <Pressable style={estilos.botaoAcao} onPress={() => aoEditar(despesa)}>
+                  <Text style={estilos.textoBotaoAcao}>Editar</Text>
+                </Pressable>
+                <Pressable style={[estilos.botaoAcao, estilos.botaoExcluir]} onPress={() => aoExcluir(despesa)}>
+                  <Text style={[estilos.textoBotaoAcao, estilos.textoBotaoExcluir]}>Excluir</Text>
+                </Pressable>
+              </View>
             </View>
-            <View style={estilos.acoesHistorico}>
-              <Pressable style={estilos.botaoAcao} onPress={() => aoEditar(despesa)}>
-                <Text style={estilos.textoBotaoAcao}>Editar</Text>
-              </Pressable>
-              <Pressable style={estilos.botaoAcao} onPress={() => aoExcluir(despesa)}>
-                <Text style={estilos.textoBotaoAcao}>Excluir</Text>
-              </Pressable>
-            </View>
+            <Text style={estilos.valorHistorico}>{formatarMoeda(despesa.valor)}</Text>
           </View>
         ))
       )}
@@ -175,40 +193,81 @@ const estilos = StyleSheet.create({
   telaFormulario: {
     flex: 1,
     justifyContent: 'flex-start',
-    paddingVertical: 22,
+    paddingVertical: 8,
+  },
+  cabecalhoTela: {
+    marginBottom: 22,
+  },
+  eyebrow: {
+    color: CORES.vermelho,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   tituloTela: {
     fontFamily: FONTE_PRINCIPAL,
-    textAlign: 'center',
     color: CORES.texto,
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: '900',
-    marginBottom: 24,
+    marginTop: 4,
+  },
+  subtituloTela: {
+    color: CORES.textoSuave,
+    marginTop: 6,
+    fontWeight: '600',
   },
   cardFormulario: {
-    backgroundColor: CORES.branco,
-    borderRadius: 12,
+    backgroundColor: CORES.superficie,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: CORES.borda,
-    padding: 16,
+    padding: 18,
+    overflow: 'hidden',
+    shadowColor: CORES.sombra,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 5,
+  },
+  cabecalhoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  tituloCard: {
+    color: CORES.texto,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  badgeEdicao: {
+    overflow: 'hidden',
+    borderRadius: 999,
+    backgroundColor: CORES.vermelhoClaro,
+    color: CORES.vermelhoEscuro,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    fontSize: 11,
+    fontWeight: '900',
   },
   campo: {
-    marginBottom: 14,
+    marginBottom: 16,
   },
   rotulo: {
     fontFamily: FONTE_PRINCIPAL,
-    color: CORES.texto,
-    fontSize: 14,
-    fontWeight: '900',
-    marginBottom: 6,
+    color: CORES.cinzaEscuro,
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   entradaSelectMes: {
-    height: 44,
+    height: 52,
     borderWidth: 1,
     borderColor: CORES.borda,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    backgroundColor: CORES.branco,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    backgroundColor: CORES.superficieSuave,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -221,63 +280,97 @@ const estilos = StyleSheet.create({
   },
   dropdownFormularioContainer: {
     marginTop: -1,
-    borderRadius: 10,
+    borderRadius: 16,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderWidth: 1,
     borderColor: CORES.borda,
-    backgroundColor: CORES.branco,
+    backgroundColor: CORES.superficie,
     maxHeight: 180,
     overflow: 'hidden',
   },
   botaoPrincipal: {
-    height: 52,
-    borderRadius: 10,
-    backgroundColor: CORES.verdeCard,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: CORES.vermelho,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 6,
+    shadowColor: CORES.vermelho,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 5,
   },
   textoBotaoPrincipal: {
     color: CORES.branco,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
-    textTransform: 'uppercase',
   },
   botaoTexto: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   rotuloBotaoTexto: {
     color: CORES.roxo,
-    fontWeight: '800',
+    fontWeight: '900',
+  },
+  cabecalhoHistorico: {
+    marginTop: 28,
+    marginBottom: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
   },
   tituloSecao: {
-    marginTop: 28,
-    marginBottom: 12,
-    textAlign: 'center',
     color: CORES.texto,
     fontSize: 22,
     fontWeight: '900',
   },
+  subtituloSecao: {
+    color: CORES.textoSuave,
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  totalPill: {
+    backgroundColor: CORES.vermelhoClaro,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'flex-end',
+  },
+  totalPillRotulo: {
+    color: CORES.vermelhoEscuro,
+    fontSize: 10,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  totalPillValor: {
+    color: CORES.vermelhoEscuro,
+    fontWeight: '900',
+    marginTop: 2,
+  },
   buscaMes: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 12,
     marginBottom: 12,
     position: 'relative',
   },
   textoSelectMes: {
     color: CORES.texto,
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '800',
   },
   textoSelectMesVazio: {
     color: CORES.textoSuave,
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '700',
   },
   botaoChevron: {
     position: 'absolute',
-    right: 10,
+    right: 12,
     top: 0,
     bottom: 0,
     alignItems: 'center',
@@ -286,19 +379,19 @@ const estilos = StyleSheet.create({
   },
   textoChevron: {
     color: CORES.texto,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '900',
-    lineHeight: 24,
+    lineHeight: 22,
   },
   opcaoMes: {
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: CORES.cinzaClaro,
     marginTop: 8,
   },
   opcaoMesAtiva: {
-    backgroundColor: CORES.verdeCard,
+    backgroundColor: CORES.azul,
   },
   textoOpcaoMes: {
     color: CORES.texto,
@@ -309,13 +402,13 @@ const estilos = StyleSheet.create({
   },
   entradaSelecao: {
     flex: 1,
-    height: 42,
+    height: 50,
     borderWidth: 1,
     borderColor: CORES.borda,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingRight: 42,
-    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingRight: 44,
+    backgroundColor: CORES.superficie,
     justifyContent: 'center',
   },
   entradaSelecaoAberta: {
@@ -325,60 +418,103 @@ const estilos = StyleSheet.create({
   dropdownContainer: {
     marginTop: -13,
     marginBottom: 12,
-    borderRadius: 10,
+    borderRadius: 16,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderWidth: 1,
     borderColor: CORES.borda,
-    backgroundColor: CORES.branco,
+    backgroundColor: CORES.superficie,
     maxHeight: 180,
     overflow: 'hidden',
   },
   dropdownScroll: {
     padding: 8,
   },
-  textoVazio: {
-    marginTop: 14,
-    textAlign: 'center',
+  estadoVazio: {
+    marginTop: 12,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: CORES.borda,
+    backgroundColor: CORES.superficie,
+    padding: 20,
+    alignItems: 'center',
+  },
+  estadoVazioTitulo: {
+    color: CORES.texto,
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  estadoVazioTexto: {
     color: CORES.textoSuave,
+    marginTop: 6,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   linhaHistorico: {
     marginTop: 10,
-    borderRadius: 12,
-    backgroundColor: CORES.branco,
+    borderRadius: 20,
+    backgroundColor: CORES.superficie,
     padding: 14,
     borderWidth: 1,
     borderColor: CORES.borda,
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  iconeDespesa: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: CORES.vermelhoClaro,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconeDespesaTexto: {
+    color: CORES.vermelho,
+    fontSize: 22,
+    fontWeight: '900',
+    lineHeight: 24,
   },
   principalHistorico: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: 8,
+    flex: 1,
   },
   tituloHistorico: {
-    flex: 1,
     color: CORES.texto,
     fontWeight: '900',
+    fontSize: 15,
+  },
+  subtituloHistorico: {
+    color: CORES.textoSuave,
+    marginTop: 3,
+    fontSize: 12,
+    fontWeight: '700',
   },
   valorHistorico: {
-    color: CORES.roxoEscuro,
+    color: CORES.vermelho,
     fontWeight: '900',
+    fontSize: 14,
   },
   acoesHistorico: {
     flexDirection: 'row',
     gap: 8,
+    marginTop: 10,
   },
   botaoAcao: {
-    flex: 1,
-    borderRadius: 8,
-    backgroundColor: CORES.verdeClaro,
+    borderRadius: 999,
+    backgroundColor: CORES.azulClaro,
     alignItems: 'center',
-    paddingVertical: 9,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+  },
+  botaoExcluir: {
+    backgroundColor: CORES.vermelhoClaro,
   },
   textoBotaoAcao: {
-    color: CORES.verdeEscuro,
+    color: CORES.roxo,
     fontWeight: '900',
-    textTransform: 'uppercase',
+    fontSize: 12,
+  },
+  textoBotaoExcluir: {
+    color: CORES.vermelho,
   },
 });

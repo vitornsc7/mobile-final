@@ -44,9 +44,18 @@ export function TelaLimite({
 
   return (
     <View style={estilos.telaFormulario}>
-      <Text style={estilos.tituloTela}>Limite</Text>
+      <View style={estilos.cabecalhoTela}>
+        <Text style={estilos.eyebrow}>Planejamento</Text>
+        <Text style={estilos.tituloTela}>Limites</Text>
+        <Text style={estilos.subtituloTela}>Defina o teto mensal e acompanhe seu histórico.</Text>
+      </View>
 
       <View style={estilos.cardFormulario}>
+        <View style={estilos.cabecalhoCard}>
+          <Text style={estilos.tituloCard}>{limiteEmEdicao ? 'Editar limite' : 'Novo limite'}</Text>
+          {limiteEmEdicao && <Text style={estilos.badgeEdicao}>Editando</Text>}
+        </View>
+
         <Campo
           rotulo="Valor"
           valor={formularioLimite.valor}
@@ -73,11 +82,7 @@ export function TelaLimite({
 
           {seletorMesFormularioAberto && (
             <View style={estilos.dropdownContainer}>
-              <ScrollView
-                style={estilos.dropdownScroll}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-              >
+              <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
                 {mesesDisponiveis.map((mes) => (
                   <Pressable
                     key={mes.valor}
@@ -103,16 +108,22 @@ export function TelaLimite({
         </View>
 
         <Pressable style={estilos.botaoPrincipal} onPress={aoSalvar}>
-          <Text style={estilos.textoBotaoPrincipal}>{limiteEmEdicao ? 'Atualizar' : 'Salvar'}</Text>
+          <Text style={estilos.textoBotaoPrincipal}>{limiteEmEdicao ? 'Atualizar limite' : 'Salvar limite'}</Text>
         </Pressable>
         {limiteEmEdicao && (
           <Pressable style={estilos.botaoTexto} onPress={aoCancelarEdicao}>
-            <Text style={estilos.rotuloBotaoTexto}>Cancelar edicao</Text>
+            <Text style={estilos.rotuloBotaoTexto}>Cancelar edição</Text>
           </Pressable>
         )}
       </View>
 
-      <Text style={estilos.tituloSecao}>Histórico</Text>
+      <View style={estilos.cabecalhoHistorico}>
+        <View>
+          <Text style={estilos.tituloSecao}>Histórico</Text>
+          <Text style={estilos.subtituloSecao}>{limites.length} limites no período</Text>
+        </View>
+      </View>
+
       <Pressable
         style={[estilos.entradaSelectMesConsulta, seletorMesConsultaAberto && estilos.entradaSelectMesAberta]}
         onPress={alternarSeletorMesConsulta}
@@ -125,11 +136,7 @@ export function TelaLimite({
 
       {seletorMesConsultaAberto && (
         <View style={estilos.dropdownHistoricoContainer}>
-          <ScrollView
-            style={estilos.dropdownScroll}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-          >
+          <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
             {mesesDisponiveis.map((mes) => (
               <Pressable
                 key={mes.valor}
@@ -146,22 +153,29 @@ export function TelaLimite({
       )}
 
       {limites.length === 0 ? (
-        <Text style={estilos.textoVazio}>Nenhum limite foi encontrado</Text>
+        <View style={estilos.estadoVazio}>
+          <Text style={estilos.estadoVazioTitulo}>Nenhum limite encontrado</Text>
+          <Text style={estilos.estadoVazioTexto}>Defina um orçamento mensal para visualizar o acompanhamento.</Text>
+        </View>
       ) : (
         limites.map((limite) => (
           <View key={limite.id} style={estilos.linhaHistorico}>
+            <View style={estilos.iconeLimite}>
+              <Text style={estilos.iconeLimiteTexto}>R$</Text>
+            </View>
             <View style={estilos.principalHistorico}>
-              <Text style={estilos.tituloHistorico}>{limite.mesReferencia}</Text>
-              <Text style={estilos.valorHistorico}>{formatarMoeda(limite.valor)}</Text>
+              <Text style={estilos.tituloHistorico}>{formatarMesReferencia(limite.mesReferencia, false)}</Text>
+              <Text style={estilos.subtituloHistorico}>Orçamento mensal</Text>
+              <View style={estilos.acoesHistorico}>
+                <Pressable style={estilos.botaoAcao} onPress={() => aoEditar(limite)}>
+                  <Text style={estilos.textoBotaoAcao}>Editar</Text>
+                </Pressable>
+                <Pressable style={[estilos.botaoAcao, estilos.botaoExcluir]} onPress={() => aoExcluir(limite)}>
+                  <Text style={[estilos.textoBotaoAcao, estilos.textoBotaoExcluir]}>Excluir</Text>
+                </Pressable>
+              </View>
             </View>
-            <View style={estilos.acoesHistorico}>
-              <Pressable style={estilos.botaoAcao} onPress={() => aoEditar(limite)}>
-                <Text style={estilos.textoBotaoAcao}>Editar</Text>
-              </Pressable>
-              <Pressable style={estilos.botaoAcao} onPress={() => aoExcluir(limite)}>
-                <Text style={estilos.textoBotaoAcao}>Excluir</Text>
-              </Pressable>
-            </View>
+            <Text style={estilos.valorHistorico}>{formatarMoeda(limite.valor)}</Text>
           </View>
         ))
       )}
@@ -172,50 +186,91 @@ export function TelaLimite({
 const estilos = StyleSheet.create({
   telaFormulario: {
     flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 22,
+    justifyContent: 'flex-start',
+    paddingVertical: 8,
+  },
+  cabecalhoTela: {
+    marginBottom: 22,
+  },
+  eyebrow: {
+    color: CORES.verde,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   tituloTela: {
     fontFamily: FONTE_PRINCIPAL,
-    textAlign: 'center',
     color: CORES.texto,
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: '900',
-    marginBottom: 24,
+    marginTop: 4,
+  },
+  subtituloTela: {
+    color: CORES.textoSuave,
+    marginTop: 6,
+    fontWeight: '600',
   },
   cardFormulario: {
-    backgroundColor: CORES.branco,
-    borderRadius: 12,
+    backgroundColor: CORES.superficie,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: CORES.borda,
-    padding: 16,
+    padding: 18,
+    overflow: 'hidden',
+    shadowColor: CORES.sombra,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 5,
+  },
+  cabecalhoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  tituloCard: {
+    color: CORES.texto,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  badgeEdicao: {
+    overflow: 'hidden',
+    borderRadius: 999,
+    backgroundColor: CORES.verdeClaro,
+    color: CORES.verdeEscuro,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    fontSize: 11,
+    fontWeight: '900',
   },
   campo: {
-    marginBottom: 14,
+    marginBottom: 16,
   },
   rotulo: {
     fontFamily: FONTE_PRINCIPAL,
-    color: CORES.texto,
-    fontSize: 14,
-    fontWeight: '900',
-    marginBottom: 6,
+    color: CORES.cinzaEscuro,
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   mensagemErro: {
-    marginBottom: 12,
-    borderRadius: 8,
-    backgroundColor: '#fee2e2',
-    color: '#991b1b',
+    marginBottom: 14,
+    borderRadius: 16,
+    backgroundColor: CORES.vermelhoClaro,
+    color: CORES.vermelhoEscuro,
     fontWeight: '800',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   entradaSelectMes: {
-    height: 44,
+    height: 52,
     borderWidth: 1,
     borderColor: CORES.borda,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    backgroundColor: CORES.branco,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    backgroundColor: CORES.superficieSuave,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -227,10 +282,12 @@ const estilos = StyleSheet.create({
   textoSelectMes: {
     fontFamily: FONTE_PRINCIPAL,
     color: CORES.texto,
+    fontWeight: '800',
   },
   textoSelectMesVazio: {
     fontFamily: FONTE_PRINCIPAL,
     color: CORES.textoSuave,
+    fontWeight: '700',
   },
   chevronSelectMes: {
     color: CORES.texto,
@@ -240,24 +297,24 @@ const estilos = StyleSheet.create({
   },
   dropdownContainer: {
     marginTop: -1,
-    borderRadius: 10,
+    borderRadius: 16,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderWidth: 1,
     borderColor: CORES.borda,
-    backgroundColor: CORES.branco,
+    backgroundColor: CORES.superficie,
     maxHeight: 180,
     overflow: 'hidden',
   },
   dropdownHistoricoContainer: {
     marginTop: -1,
     marginBottom: 12,
-    borderRadius: 10,
+    borderRadius: 16,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderWidth: 1,
     borderColor: CORES.borda,
-    backgroundColor: CORES.branco,
+    backgroundColor: CORES.superficie,
     maxHeight: 180,
     overflow: 'hidden',
   },
@@ -265,14 +322,14 @@ const estilos = StyleSheet.create({
     padding: 8,
   },
   opcaoMes: {
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: CORES.cinzaClaro,
     marginTop: 8,
   },
   opcaoMesAtiva: {
-    backgroundColor: CORES.verdeCard,
+    backgroundColor: CORES.azul,
   },
   textoOpcaoMes: {
     color: CORES.texto,
@@ -282,88 +339,141 @@ const estilos = StyleSheet.create({
     color: CORES.branco,
   },
   botaoPrincipal: {
-    height: 52,
-    borderRadius: 10,
-    backgroundColor: CORES.verdeCard,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: CORES.verde,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 6,
+    shadowColor: CORES.verde,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 5,
   },
   textoBotaoPrincipal: {
     color: CORES.branco,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
-    textTransform: 'uppercase',
   },
   botaoTexto: {
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   rotuloBotaoTexto: {
     color: CORES.roxo,
-    fontWeight: '800',
+    fontWeight: '900',
+  },
+  cabecalhoHistorico: {
+    marginTop: 28,
+    marginBottom: 14,
   },
   tituloSecao: {
-    marginTop: 28,
-    marginBottom: 12,
-    textAlign: 'center',
     color: CORES.texto,
     fontSize: 22,
     fontWeight: '900',
   },
+  subtituloSecao: {
+    color: CORES.textoSuave,
+    marginTop: 4,
+    fontSize: 12,
+    fontWeight: '700',
+  },
   entradaSelectMesConsulta: {
-    height: 42,
+    height: 50,
     borderWidth: 1,
     borderColor: CORES.borda,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    backgroundColor: CORES.superficie,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  textoVazio: {
-    marginTop: 14,
-    textAlign: 'center',
+  estadoVazio: {
+    marginTop: 12,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: CORES.borda,
+    backgroundColor: CORES.superficie,
+    padding: 20,
+    alignItems: 'center',
+  },
+  estadoVazioTitulo: {
+    color: CORES.texto,
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  estadoVazioTexto: {
     color: CORES.textoSuave,
+    marginTop: 6,
+    textAlign: 'center',
+    fontWeight: '600',
   },
   linhaHistorico: {
     marginTop: 10,
-    borderRadius: 12,
-    backgroundColor: CORES.branco,
+    borderRadius: 20,
+    backgroundColor: CORES.superficie,
     padding: 14,
     borderWidth: 1,
     borderColor: CORES.borda,
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  iconeLimite: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    backgroundColor: CORES.verdeClaro,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconeLimiteTexto: {
+    color: CORES.verdeEscuro,
+    fontSize: 12,
+    fontWeight: '900',
   },
   principalHistorico: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: 8,
+    flex: 1,
   },
   tituloHistorico: {
-    flex: 1,
     color: CORES.texto,
     fontWeight: '900',
+    fontSize: 15,
+  },
+  subtituloHistorico: {
+    color: CORES.textoSuave,
+    marginTop: 3,
+    fontSize: 12,
+    fontWeight: '700',
   },
   valorHistorico: {
-    color: CORES.roxoEscuro,
+    color: CORES.verde,
     fontWeight: '900',
+    fontSize: 14,
   },
   acoesHistorico: {
     flexDirection: 'row',
     gap: 8,
+    marginTop: 10,
   },
   botaoAcao: {
-    flex: 1,
-    borderRadius: 8,
-    backgroundColor: CORES.verdeClaro,
+    borderRadius: 999,
+    backgroundColor: CORES.azulClaro,
     alignItems: 'center',
-    paddingVertical: 9,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+  },
+  botaoExcluir: {
+    backgroundColor: CORES.vermelhoClaro,
   },
   textoBotaoAcao: {
-    color: CORES.verdeEscuro,
+    color: CORES.roxo,
     fontWeight: '900',
-    textTransform: 'uppercase',
+    fontSize: 12,
+  },
+  textoBotaoExcluir: {
+    color: CORES.vermelho,
   },
 });

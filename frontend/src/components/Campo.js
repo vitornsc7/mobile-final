@@ -12,7 +12,7 @@ export function Campo({ rotulo, valor, aoAlterarTexto, dica, tipoTeclado = 'defa
         onChangeText={aoAlterarTexto}
         placeholder={dica}
         keyboardType={tipoTeclado}
-        placeholderTextColor="#8c95a3"
+        placeholderTextColor={CORES.textoSuave}
       />
     </View>
   );
@@ -20,23 +20,27 @@ export function Campo({ rotulo, valor, aoAlterarTexto, dica, tipoTeclado = 'defa
 
 const estilos = StyleSheet.create({
   campo: {
-    marginBottom: 14,
+    marginBottom: 16,
   },
   rotulo: {
     fontFamily: FONTE_PRINCIPAL,
-    color: CORES.texto,
-    fontSize: 14,
-    fontWeight: '900',
-    marginBottom: 6,
+    color: CORES.cinzaEscuro,
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 8,
+    letterSpacing: 0.2,
+    textTransform: 'uppercase',
   },
   entrada: {
     fontFamily: FONTE_PRINCIPAL,
-    height: 44,
+    height: 52,
     borderWidth: 1,
     borderColor: CORES.borda,
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderRadius: 16,
+    paddingHorizontal: 16,
     color: CORES.texto,
-    backgroundColor: CORES.branco,
+    backgroundColor: CORES.superficieSuave,
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

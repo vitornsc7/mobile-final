@@ -25,40 +25,53 @@ export function TelaInicio({
   const mesFinalizado = mesSelecionado < obterMesReferenciaAtual();
   const economizou = possuiLimite && totalDespesas <= valorLimite;
   const progresso = possuiLimite ? Math.min(totalDespesas / valorLimite, 1) : 0;
+  const saldoDisponivel = valorLimite - totalDespesas;
 
   const temQualquerFinanca = mesesCadastrados.length > 0;
   const mesTemFinancas = mesSelecionado && mesesCadastrados.includes(mesSelecionado);
   const progressoNaoEncontrado = Boolean(mesSelecionado) && !mesTemFinancas;
 
-  let titulo = 'Nenhuma finança registrada!';
-  let mensagem = 'Cadastre um limite e registre suas despesas!';
+  let titulo = 'Nenhuma finança registrada';
+  let mensagem = 'Cadastre um limite e registre suas despesas para acompanhar sua evolução.';
   let resultado = '';
+  let status = 'Comece agora';
   let estiloTom = estilos.feedbackInformativo;
 
   if (progressoNaoEncontrado) {
     titulo = 'Progresso não encontrado';
     mensagem = 'Nenhum limite ou despesa foi cadastrado para esse mês.';
+    status = 'Sem dados';
   } else if (!temQualquerFinanca) {
-    // permanece como 'Nenhuma finança registrada!'
+    // Mantem o estado inicial.
   } else if (possuiLimite && economizou) {
-    titulo = mesFinalizado ? 'Parabéns, você economizou' : 'Continue assim!';
-    mensagem = `Você está dentro do limite estabelecido!`;
-    resultado = mesFinalizado ? `+${formatarMoeda(valorLimite - totalDespesas)}` : '';
+    titulo = mesFinalizado ? 'Meta concluída' : 'Dentro do planejado';
+    mensagem = 'Você está abaixo do limite definido para este mês.';
+    resultado = mesFinalizado ? `+${formatarMoeda(saldoDisponivel)}` : formatarMoeda(Math.max(saldoDisponivel, 0));
+    status = mesFinalizado ? 'Economia final' : 'Disponível';
     estiloTom = estilos.feedbackSucesso;
   } else if (possuiLimite && !economizou) {
-    titulo = mesFinalizado ? 'Objetivo não atingido!' : 'Atenção!';
-    mensagem = `Você excedeu o limite`;
-    resultado = mesFinalizado ? `-${formatarMoeda(totalDespesas - valorLimite)}` : '';
+    titulo = mesFinalizado ? 'Meta não atingida' : 'Limite ultrapassado';
+    mensagem = 'Você excedeu o limite definido. Revise os gastos recentes.';
+    resultado = mesFinalizado ? `-${formatarMoeda(totalDespesas - valorLimite)}` : formatarMoeda(totalDespesas - valorLimite);
+    status = mesFinalizado ? 'Excedido' : 'Acima do limite';
     estiloTom = estilos.feedbackErro;
   }
 
   return (
     <View>
-      <Text style={estilos.saudacao}>Olá, João 👋</Text>
-      <Text style={estilos.textoAjuda}>É bom te ver por aqui!</Text>
+      <View style={estilos.cabecalho}>
+        <View>
+          <Text style={estilos.saudacao}>Olá, João</Text>
+          <Text style={estilos.textoAjuda}>Seu painel financeiro em tempo real.</Text>
+        </View>
+        <View style={estilos.avatar}>
+          <Text style={estilos.avatarTexto}>J</Text>
+        </View>
+      </View>
 
       {mesesDisponiveis.length > 0 && (
-        <View>
+        <View style={estilos.blocoMes}>
+          <Text style={estilos.rotuloCampo}>Período de análise</Text>
           <View style={estilos.buscaMes}>
             <Pressable
               style={[estilos.entradaSelecao, seletorMesAberto && estilos.entradaSelecaoAberta]}
@@ -75,11 +88,7 @@ export function TelaInicio({
 
           {seletorMesAberto && (
             <View style={estilos.dropdownContainer}>
-              <ScrollView
-                style={estilos.dropdownScroll}
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}
-              >
+              <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
                 {mesesDisponiveis.map((mes) => (
                   <Pressable
                     key={mes.valor}
@@ -97,8 +106,11 @@ export function TelaInicio({
         </View>
       )}
 
-      <View style={[estilos.cartaoFeedback, !temQualquerFinanca && estilos.cartaoFeedbackVazio, estiloTom]}>
-        <Text style={estilos.rostoFeedback}>{possuiLimite ? (economizou ? '🙂' : '😢') : '😴'}</Text>
+      <View style={[estilos.cartaoFeedback, estiloTom]}>
+        <View style={estilos.linhaStatus}>
+          <Text style={estilos.badgeStatus}>{status}</Text>
+          <Text style={estilos.percentual}>{possuiLimite ? `${Math.round(progresso * 100)}% usado` : 'Sem limite'}</Text>
+        </View>
         <Text style={estilos.tituloFeedback}>{titulo}</Text>
         {Boolean(resultado) && <Text style={estilos.resultadoFeedback}>{resultado}</Text>}
         <Text style={estilos.textoFeedback}>{mensagem}</Text>
@@ -115,29 +127,54 @@ export function TelaInicio({
         ) : (
           !possuiLimite && (
             <Pressable style={estilos.botaoFeedback} onPress={aoIrParaLimite}>
-              <Text style={estilos.textoBotaoFeedback}>Começar</Text>
+              <Text style={estilos.textoBotaoFeedback}>Criar limite</Text>
             </Pressable>
           )
         )}
       </View>
 
-      <View style={estilos.cabecalhoProgresso}>
-        <Text style={estilos.rotuloProgresso}>Progresso</Text>
-        <Text style={estilos.rotuloProgresso}>
-          {possuiLimite ? `${formatarMoeda(totalDespesas)} / ${formatarMoeda(valorLimite)}` : formatarMoeda(totalDespesas)}
-        </Text>
+      <View style={estilos.gradeMetricas}>
+        <View style={estilos.metricaCard}>
+          <Text style={estilos.rotuloMetrica}>Despesas</Text>
+          <Text style={[estilos.valorMetrica, estilos.valorDespesa]}>{formatarMoeda(totalDespesas)}</Text>
+        </View>
+        <View style={estilos.metricaCard}>
+          <Text style={estilos.rotuloMetrica}>Limite mensal</Text>
+          <Text style={estilos.valorMetrica}>{possuiLimite ? formatarMoeda(valorLimite) : 'Não definido'}</Text>
+        </View>
       </View>
-      <View style={estilos.trilhaProgresso}>
-        <View style={[estilos.preenchimentoProgresso, { width: `${possuiLimite ? progresso * 100 : 0}%` }]} />
+
+      <View style={estilos.progressoCard}>
+        <View style={estilos.cabecalhoProgresso}>
+          <Text style={estilos.rotuloProgresso}>Uso do orçamento</Text>
+          <Text style={estilos.rotuloProgresso}>
+            {possuiLimite ? `${formatarMoeda(totalDespesas)} / ${formatarMoeda(valorLimite)}` : formatarMoeda(totalDespesas)}
+          </Text>
+        </View>
+        <View style={estilos.trilhaProgresso}>
+          <View
+            style={[
+              estilos.preenchimentoProgresso,
+              !economizou && possuiLimite && estilos.preenchimentoProgressoErro,
+              { width: `${possuiLimite ? progresso * 100 : 0}%` },
+            ]}
+          />
+        </View>
       </View>
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
+  cabecalho: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
   saudacao: {
     fontFamily: FONTE_PRINCIPAL,
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '900',
     color: CORES.texto,
   },
@@ -146,23 +183,50 @@ const estilos = StyleSheet.create({
     marginTop: 6,
     color: CORES.textoSuave,
     fontSize: 14,
+    fontWeight: '600',
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    backgroundColor: CORES.azul,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: CORES.azul,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+  avatarTexto: {
+    color: CORES.branco,
+    fontWeight: '900',
+    fontSize: 18,
+  },
+  blocoMes: {
+    marginTop: 28,
+  },
+  rotuloCampo: {
+    color: CORES.cinzaEscuro,
+    fontSize: 12,
+    fontWeight: '900',
+    marginBottom: 8,
+    textTransform: 'uppercase',
   },
   buscaMes: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 42,
-    marginBottom: 0,
     position: 'relative',
   },
   entradaSelecao: {
     flex: 1,
-    height: 46,
+    height: 52,
     borderWidth: 1,
     borderColor: CORES.borda,
-    borderRadius: 7,
-    paddingHorizontal: 14,
-    paddingRight: 42,
-    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingRight: 44,
+    backgroundColor: CORES.superficie,
     justifyContent: 'center',
   },
   entradaSelecaoAberta: {
@@ -171,15 +235,17 @@ const estilos = StyleSheet.create({
   },
   textoSelectMes: {
     color: CORES.texto,
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '800',
   },
   textoSelectMesVazio: {
     color: CORES.textoSuave,
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '700',
   },
   botaoChevron: {
     position: 'absolute',
-    right: 10,
+    right: 12,
     top: 0,
     bottom: 0,
     alignItems: 'center',
@@ -188,36 +254,19 @@ const estilos = StyleSheet.create({
   },
   textoChevron: {
     color: CORES.texto,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '900',
-    lineHeight: 24,
-  },
-  fundoModalSelect: {
-    flex: 1,
-    backgroundColor: 'rgba(17, 24, 39, 0.45)',
-    justifyContent: 'center',
-    paddingHorizontal: 28,
-  },
-  modalSelect: {
-    backgroundColor: CORES.branco,
-    borderRadius: 12,
-    padding: 18,
-  },
-  tituloModalSelect: {
-    color: CORES.texto,
-    fontSize: 18,
-    fontWeight: '900',
-    marginBottom: 12,
+    lineHeight: 22,
   },
   opcaoMes: {
-    borderRadius: 8,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 12,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: CORES.cinzaClaro,
     marginTop: 8,
   },
   opcaoMesAtiva: {
-    backgroundColor: CORES.verdeCard,
+    backgroundColor: CORES.azul,
   },
   textoOpcaoMes: {
     color: CORES.texto,
@@ -228,12 +277,12 @@ const estilos = StyleSheet.create({
   },
   dropdownContainer: {
     marginTop: -1,
-    borderRadius: 10,
+    borderRadius: 16,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderWidth: 1,
     borderColor: CORES.borda,
-    backgroundColor: CORES.branco,
+    backgroundColor: CORES.superficie,
     maxHeight: 220,
     overflow: 'hidden',
   },
@@ -241,117 +290,171 @@ const estilos = StyleSheet.create({
     padding: 8,
   },
   cartaoFeedback: {
-    minHeight: 190,
+    minHeight: 210,
     marginTop: 18,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  cartaoFeedbackVazio: {
-    marginTop: 24,
+    borderRadius: 26,
+    padding: 22,
+    overflow: 'hidden',
+    shadowColor: CORES.sombra,
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.16,
+    shadowRadius: 26,
+    elevation: 8,
   },
   feedbackSucesso: {
-    backgroundColor: CORES.verdeCard,
+    backgroundColor: CORES.mentaClaro,
   },
   feedbackErro: {
-    backgroundColor: '#f3b3bd',
+    backgroundColor: CORES.vermelhoClaro,
   },
   feedbackInformativo: {
-    backgroundColor: CORES.verdeCard,
+    backgroundColor: CORES.roxoClaro,
   },
-  rostoFeedback: {
-    fontSize: 56,
+  linhaStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  badgeStatus: {
+    overflow: 'hidden',
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.62)',
+    color: CORES.roxoEscuro,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    fontSize: 12,
     fontWeight: '900',
-    color: CORES.texto,
-    textAlign: 'center',
-    lineHeight: 70,
+  },
+  percentual: {
+    color: CORES.textoSuave,
+    fontSize: 12,
+    fontWeight: '800',
   },
   tituloFeedback: {
     fontFamily: FONTE_PRINCIPAL,
-    marginTop: 8,
-    color: CORES.texto,
-    fontSize: 20,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  resultadoFeedback: {
-    fontFamily: FONTE_PRINCIPAL,
-    marginTop: 4,
+    marginTop: 26,
     color: CORES.texto,
     fontSize: 24,
     fontWeight: '900',
   },
+  resultadoFeedback: {
+    fontFamily: FONTE_PRINCIPAL,
+    marginTop: 6,
+    color: CORES.texto,
+    fontSize: 34,
+    fontWeight: '900',
+  },
   textoFeedback: {
     fontFamily: FONTE_PRINCIPAL,
-    marginTop: 8,
-    color: CORES.texto,
-    textAlign: 'center',
+    marginTop: 10,
+    color: CORES.textoSuave,
     fontWeight: '700',
+    lineHeight: 20,
   },
   acoesComecarRegistros: {
     flexDirection: 'row',
     gap: 10,
     width: '100%',
-    marginTop: 18,
+    marginTop: 22,
   },
   botaoComecarPrimario: {
     flex: 1,
-    backgroundColor: CORES.branco,
-    borderRadius: 8,
-    paddingVertical: 12,
+    backgroundColor: CORES.roxo,
+    borderRadius: 16,
+    paddingVertical: 13,
     alignItems: 'center',
   },
   textoBotaoComecarPrimario: {
-    color: CORES.verde,
+    color: CORES.branco,
     fontWeight: '900',
   },
   botaoComecarSecundario: {
     flex: 1,
-    backgroundColor: 'transparent',
-    borderRadius: 8,
-    paddingVertical: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.46)',
+    borderRadius: 16,
+    paddingVertical: 13,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: CORES.branco,
+    borderColor: 'rgba(111, 75, 216, 0.18)',
   },
   textoBotaoComecarSecundario: {
-    color: CORES.branco,
+    color: CORES.roxoEscuro,
     fontWeight: '900',
   },
   botaoFeedback: {
-    marginTop: 14,
+    marginTop: 18,
     borderRadius: 16,
     backgroundColor: CORES.roxo,
-    paddingHorizontal: 34,
-    paddingVertical: 11,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    alignSelf: 'flex-start',
   },
   textoBotaoFeedback: {
     fontFamily: FONTE_PRINCIPAL,
     color: CORES.branco,
     fontWeight: '900',
-    textTransform: 'uppercase',
+  },
+  gradeMetricas: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  metricaCard: {
+    flex: 1,
+    backgroundColor: CORES.superficie,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: CORES.borda,
+    padding: 16,
+    overflow: 'hidden',
+  },
+  rotuloMetrica: {
+    color: CORES.textoSuave,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  valorMetrica: {
+    marginTop: 8,
+    color: CORES.texto,
+    fontSize: 17,
+    fontWeight: '900',
+  },
+  valorDespesa: {
+    color: CORES.vermelho,
+  },
+  progressoCard: {
+    marginTop: 16,
+    backgroundColor: CORES.superficie,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: CORES.borda,
+    padding: 16,
   },
   cabecalhoProgresso: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 22,
+    gap: 12,
   },
   rotuloProgresso: {
     fontFamily: FONTE_PRINCIPAL,
     color: CORES.texto,
     fontSize: 12,
+    fontWeight: '800',
   },
   trilhaProgresso: {
-    height: 32,
-    marginTop: 6,
-    backgroundColor: '#d9d9d9',
-    borderRadius: 12,
+    height: 12,
+    marginTop: 12,
+    backgroundColor: CORES.azulClaro,
+    borderRadius: 999,
     overflow: 'hidden',
   },
   preenchimentoProgresso: {
     height: '100%',
     backgroundColor: CORES.verdeCard,
-    borderRadius: 12,
+    borderRadius: 999,
+  },
+  preenchimentoProgressoErro: {
+    backgroundColor: CORES.vermelho,
   },
 });
