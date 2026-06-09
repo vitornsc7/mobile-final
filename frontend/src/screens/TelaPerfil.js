@@ -5,20 +5,40 @@ import { FONTE_PRINCIPAL } from '../theme/typography';
 export function TelaPerfil() {
   return (
     <View style={estilos.telaPerfil}>
-      <Text style={estilos.tituloTela}>Meus Dados</Text>
+      <View style={estilos.cabecalhoTela}>
+        <Text style={estilos.eyebrow}>Conta</Text>
+        <Text style={estilos.tituloTela}>Meus dados</Text>
+        <Text style={estilos.subtituloTela}>Informações básicas do perfil conectado.</Text>
+      </View>
+
+      <View style={estilos.cartaoHero}>
+        <View style={estilos.avatarGrande}>
+          <Text style={estilos.avatarTexto}>J</Text>
+        </View>
+        <View style={estilos.resumoPerfil}>
+          <Text style={estilos.nomePerfil}>João</Text>
+          <Text style={estilos.emailPerfil}>joao@gmail.com</Text>
+        </View>
+      </View>
 
       <View style={estilos.cardPerfil}>
-        <Text style={estilos.rotuloPerfil}>Nome</Text>
-        <Text style={estilos.valorPerfil}>João</Text>
+        <View style={estilos.linhaPerfil}>
+          <Text style={estilos.rotuloPerfil}>Nome</Text>
+          <Text style={estilos.valorPerfil}>João</Text>
+        </View>
 
-        <Text style={estilos.rotuloPerfil}>E-mail</Text>
-        <Text style={estilos.valorPerfil}>joao@gmail.com</Text>
+        <View style={estilos.linhaPerfil}>
+          <Text style={estilos.rotuloPerfil}>E-mail</Text>
+          <Text style={estilos.valorPerfil}>joao@gmail.com</Text>
+        </View>
 
-        <Text style={estilos.rotuloPerfil}>Data de nascimento</Text>
-        <Text style={estilos.valorPerfil}>09/12/1987</Text>
+        <View style={estilos.linhaPerfil}>
+          <Text style={estilos.rotuloPerfil}>Data de nascimento</Text>
+          <Text style={estilos.valorPerfil}>09/12/1987</Text>
+        </View>
 
         <Pressable style={estilos.botaoPrincipal}>
-          <Text style={estilos.textoBotaoPrincipal}>Sair</Text>
+          <Text style={estilos.textoBotaoPrincipal}>Sair da conta</Text>
         </Pressable>
       </View>
     </View>
@@ -28,46 +48,106 @@ export function TelaPerfil() {
 const estilos = StyleSheet.create({
   telaPerfil: {
     flex: 1,
-    justifyContent: 'center',
-    paddingVertical: 22,
+    justifyContent: 'flex-start',
+    paddingVertical: 8,
+  },
+  cabecalhoTela: {
+    marginBottom: 22,
+  },
+  eyebrow: {
+    color: CORES.roxo,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
   },
   tituloTela: {
     fontFamily: FONTE_PRINCIPAL,
-    textAlign: 'center',
     color: CORES.texto,
-    fontSize: 30,
+    fontSize: 32,
     fontWeight: '900',
-    marginBottom: 24,
+    marginTop: 4,
+  },
+  subtituloTela: {
+    color: CORES.textoSuave,
+    marginTop: 6,
+    fontWeight: '600',
+  },
+  cartaoHero: {
+    backgroundColor: CORES.roxoClaro,
+    borderRadius: 26,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    overflow: 'hidden',
+    shadowColor: CORES.roxo,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 7,
+  },
+  avatarGrande: {
+    width: 64,
+    height: 64,
+    borderRadius: 22,
+    backgroundColor: CORES.branco,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarTexto: {
+    color: CORES.roxoEscuro,
+    fontSize: 24,
+    fontWeight: '900',
+  },
+  resumoPerfil: {
+    flex: 1,
+  },
+  nomePerfil: {
+    color: CORES.texto,
+    fontSize: 22,
+    fontWeight: '900',
+  },
+  emailPerfil: {
+    color: CORES.textoSuave,
+    marginTop: 5,
+    fontWeight: '700',
   },
   cardPerfil: {
+    marginTop: 16,
     backgroundColor: CORES.branco,
-    borderRadius: 12,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: CORES.borda,
     padding: 18,
   },
+  linhaPerfil: {
+    borderBottomWidth: 1,
+    borderBottomColor: CORES.borda,
+    paddingVertical: 14,
+  },
   rotuloPerfil: {
-    color: CORES.texto,
+    color: CORES.textoSuave,
+    fontSize: 12,
     fontWeight: '900',
-    marginTop: 16,
+    textTransform: 'uppercase',
   },
   valorPerfil: {
-    color: CORES.textoSuave,
+    color: CORES.texto,
     marginTop: 6,
     fontSize: 16,
+    fontWeight: '800',
   },
   botaoPrincipal: {
-    height: 52,
-    borderRadius: 10,
-    backgroundColor: CORES.verdeCard,
+    height: 54,
+    borderRadius: 18,
+    backgroundColor: CORES.vermelho,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 26,
+    marginTop: 22,
   },
   textoBotaoPrincipal: {
     color: CORES.branco,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
-    textTransform: 'uppercase',
   },
 });

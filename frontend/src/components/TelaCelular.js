@@ -25,22 +25,18 @@ export function TelaCelular({ children, telaAtiva, aoTrocarTela }) {
 const estilos = StyleSheet.create({
   fundoAplicativo: {
     flex: 1,
-    backgroundColor: CORES.fundo,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: CORES.fundoElevado,
   },
   celular: {
     flex: 1,
     width: '100%',
-    maxWidth: 420,
-    backgroundColor: CORES.branco,
-    borderRadius: 0,
+    backgroundColor: CORES.fundoElevado,
     overflow: 'hidden',
   },
   conteudoCelular: {
     flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 36,
-    paddingBottom: 104,
+    paddingHorizontal: 24,
+    paddingTop: 34,
+    paddingBottom: 140,
   },
 });
