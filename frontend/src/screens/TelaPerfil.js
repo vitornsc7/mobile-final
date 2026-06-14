@@ -1,8 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CORES } from '../theme/colors';
 import { FONTE_PRINCIPAL } from '../theme/typography';
+import { isoParaBR } from '../utils/dateUtils';
 
-export function TelaPerfil() {
+export function TelaPerfil({ usuario, aoSair }) {
+  const inicial = usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : '?';
+
   return (
     <View style={estilos.telaPerfil}>
       <View style={estilos.cabecalhoTela}>
@@ -13,31 +16,31 @@ export function TelaPerfil() {
 
       <View style={estilos.cartaoHero}>
         <View style={estilos.avatarGrande}>
-          <Text style={estilos.avatarTexto}>J</Text>
+          <Text style={estilos.avatarTexto}>{inicial}</Text>
         </View>
         <View style={estilos.resumoPerfil}>
-          <Text style={estilos.nomePerfil}>João</Text>
-          <Text style={estilos.emailPerfil}>joao@gmail.com</Text>
+          <Text style={estilos.nomePerfil}>{usuario?.nome ?? '—'}</Text>
+          <Text style={estilos.emailPerfil}>{usuario?.email ?? '—'}</Text>
         </View>
       </View>
 
       <View style={estilos.cardPerfil}>
         <View style={estilos.linhaPerfil}>
           <Text style={estilos.rotuloPerfil}>Nome</Text>
-          <Text style={estilos.valorPerfil}>João</Text>
+          <Text style={estilos.valorPerfil}>{usuario?.nome ?? '—'}</Text>
         </View>
 
         <View style={estilos.linhaPerfil}>
           <Text style={estilos.rotuloPerfil}>E-mail</Text>
-          <Text style={estilos.valorPerfil}>joao@gmail.com</Text>
+          <Text style={estilos.valorPerfil}>{usuario?.email ?? '—'}</Text>
         </View>
 
         <View style={estilos.linhaPerfil}>
           <Text style={estilos.rotuloPerfil}>Data de nascimento</Text>
-          <Text style={estilos.valorPerfil}>09/12/1987</Text>
+          <Text style={estilos.valorPerfil}>{isoParaBR(usuario?.dataNascimento)}</Text>
         </View>
 
-        <Pressable style={estilos.botaoPrincipal}>
+        <Pressable style={estilos.botaoPrincipal} onPress={aoSair}>
           <Text style={estilos.textoBotaoPrincipal}>Sair da conta</Text>
         </Pressable>
       </View>
@@ -140,7 +143,7 @@ const estilos = StyleSheet.create({
   botaoPrincipal: {
     height: 54,
     borderRadius: 18,
-    backgroundColor: CORES.vermelho,
+    backgroundColor: CORES.verde,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 22,

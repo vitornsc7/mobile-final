@@ -1,14 +1,15 @@
-const URL_API = 'http://localhost:3000';
-const TOKEN_DEMO = 'demo-token';
-const USUARIO_DEMO_ID = 'demo-user';
+import { obterToken } from '../utils/storage';
+
+const URL_API = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 
 export async function requisicaoApi(caminho, opcoes = {}) {
+  const token = await obterToken();
+
   const resposta = await fetch(`${URL_API}${caminho}`, {
     ...opcoes,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${TOKEN_DEMO}`,
-      'x-user-id': USUARIO_DEMO_ID,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(opcoes.headers || {}),
     },
   });
