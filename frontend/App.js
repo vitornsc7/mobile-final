@@ -61,9 +61,16 @@ export default function App() {
 
     async function iniciarTela() {
       try {
-        await carregarMesesCadastrados();
-        definirDespesas([]);
-        definirLimites([]);
+        const meses = await carregarMesesCadastrados();
+        if (meses.length > 0) {
+          const mesAtual = obterMesReferenciaAtual();
+          const mesParaSelecionar = meses.includes(mesAtual) ? mesAtual : meses[0];
+          definirMesSelecionado(mesParaSelecionar);
+          await carregarDados(mesParaSelecionar);
+        } else {
+          definirDespesas([]);
+          definirLimites([]);
+        }
       } catch (erro) {
         Alert.alert('Erro', erro.message);
       }

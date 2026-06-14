@@ -3,7 +3,7 @@ import { ChevronDown } from '../components/ChevronDown';
 import { CORES } from '../theme/colors';
 import { FONTE_PRINCIPAL } from '../theme/typography';
 import { formatarMoeda } from '../utils/currencyUtils';
-import { gerarMesesDisponiveis, obterMesReferenciaAtual } from '../utils/dateUtils';
+import { formatarMesReferencia, obterMesReferenciaAtual } from '../utils/dateUtils';
 
 export function TelaInicio({
   usuario,
@@ -18,7 +18,10 @@ export function TelaInicio({
   aoIrParaDespesa,
   aoIrParaLimite,
 }) {
-  const mesesDisponiveis = gerarMesesDisponiveis();
+  const mesesDisponiveis = mesesCadastrados.map((valor) => ({
+    valor,
+    rotulo: formatarMesReferencia(valor, true),
+  }));
   const mesSelecionadoRotulo = mesesDisponiveis.find((mes) => mes.valor === mesSelecionado)?.rotulo || mesSelecionado;
   const aoAlternarSeletorMes = seletorMesAberto ? aoFecharSeletorMes : aoAbrirSeletorMes;
   const possuiLimite = Boolean(limiteAtual);
