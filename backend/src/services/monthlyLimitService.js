@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto');
-const { lerBanco, escreverBanco } = require('../repositories/jsonDatabase');
+const { Op } = require('sequelize');
+const MonthlyLimit = require('../models/MonthlyLimit');
 const { httpError } = require('../utils/errors');
 const { validarMesReferencia, mesReferenciaAnterior } = require('../utils/month');
 
@@ -28,93 +29,81 @@ function validarDadosLimiteMensal(dadosRecebidos, opcoes = {}) {
   };
 }
 
-function listarLimitesMensais(usuarioId, mesReferencia) {
+async function listarLimitesMensais(usuarioId, mesReferencia) {
   const erroMes = mesReferencia ? validarMesReferencia(mesReferencia) : null;
 
   if (erroMes) {
     throw httpError(400, erroMes);
   }
 
-  const banco = lerBanco();
+  const where = { usuarioId };
+  if (mesReferencia) where.mesReferencia = mesReferencia;
 
-  return banco.limitesMensais.filter((limite) => {
-    const pertenceAoUsuario = limite.usuarioId === usuarioId;
-    const pertenceAoMes = !mesReferencia || limite.mesReferencia === mesReferencia;
-    return pertenceAoUsuario && pertenceAoMes;
-  });
+  const limites = await MonthlyLimit.findAll({ where });
+  return limites.map((l) => l.toJSON());
 }
 
-function criarLimiteMensal(usuarioId, dadosRecebidos) {
+async function criarLimiteMensal(usuarioId, dadosRecebidos) {
   const dadosValidados = validarDadosLimiteMensal(dadosRecebidos);
-  const banco = lerBanco();
-  const limiteJaExiste = banco.limitesMensais.some(
-    (limite) => limite.usuarioId === usuarioId && limite.mesReferencia === dadosValidados.mesReferencia,
-  );
+
+  const limiteJaExiste = await MonthlyLimit.findOne({
+    where: { usuarioId, mesReferencia: dadosValidados.mesReferencia },
+  });
 
   if (limiteJaExiste) {
     throw httpError(409, 'Esse mês já possui um limite cadastrado. Você pode editar o limite existente.');
   }
 
-  const agora = new Date().toISOString();
-  const limiteMensal = {
+  const agora = new Date();
+  const limiteMensal = await MonthlyLimit.create({
     id: randomUUID(),
     usuarioId,
     ...dadosValidados,
     criadoEm: agora,
     atualizadoEm: agora,
-  };
+  });
 
-  banco.limitesMensais.push(limiteMensal);
-  escreverBanco(banco);
-
-  return limiteMensal;
+  return limiteMensal.toJSON();
 }
 
-function atualizarLimiteMensal(usuarioId, limiteId, dadosRecebidos) {
+async function atualizarLimiteMensal(usuarioId, limiteId, dadosRecebidos) {
   const dadosValidados = validarDadosLimiteMensal(dadosRecebidos, { bloquearMesAnterior: false });
-  const banco = lerBanco();
-  const indice = banco.limitesMensais.findIndex((limite) => limite.id === limiteId && limite.usuarioId === usuarioId);
 
-  if (indice === -1) {
+  const limite = await MonthlyLimit.findOne({ where: { id: limiteId, usuarioId } });
+
+  if (!limite) {
     throw httpError(404, 'Limite não encontrado!');
   }
 
-  const limiteAtual = banco.limitesMensais[indice];
-
-  const mesDuplicado = banco.limitesMensais.some((limite) => {
-    return limite.id !== limiteId && limite.usuarioId === usuarioId && limite.mesReferencia === dadosValidados.mesReferencia;
+  const mesDuplicado = await MonthlyLimit.findOne({
+    where: {
+      usuarioId,
+      mesReferencia: dadosValidados.mesReferencia,
+      id: { [Op.ne]: limiteId },
+    },
   });
 
   if (mesDuplicado) {
     throw httpError(409, 'Esse mês já possui um limite cadastrado. Você pode editar o limite existente.');
   }
 
-  const limiteAtualizado = {
-    ...limiteAtual,
-    ...dadosValidados,
-    atualizadoEm: new Date().toISOString(),
-  };
+  await limite.update({ ...dadosValidados, atualizadoEm: new Date() });
 
-  banco.limitesMensais[indice] = limiteAtualizado;
-  escreverBanco(banco);
-
-  return limiteAtualizado;
+  return limite.toJSON();
 }
 
-function excluirLimiteMensal(usuarioId, limiteId) {
-  const banco = lerBanco();
-  const limiteMensal = banco.limitesMensais.find((limite) => limite.id === limiteId && limite.usuarioId === usuarioId);
+async function excluirLimiteMensal(usuarioId, limiteId) {
+  const limite = await MonthlyLimit.findOne({ where: { id: limiteId, usuarioId } });
 
-  if (!limiteMensal) {
+  if (!limite) {
     throw httpError(404, 'Limite não encontrado!');
   }
 
-  if (mesReferenciaAnterior(limiteMensal.mesReferencia)) {
+  if (mesReferenciaAnterior(limite.mesReferencia)) {
     throw httpError(400, 'Não é permitido excluir limites de meses anteriores!');
   }
 
-  banco.limitesMensais = banco.limitesMensais.filter((limite) => limite.id !== limiteId);
-  escreverBanco(banco);
+  await limite.destroy();
 }
 
 module.exports = {

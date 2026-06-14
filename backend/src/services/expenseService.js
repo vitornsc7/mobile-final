@@ -1,5 +1,6 @@
 const { randomUUID } = require('crypto');
-const { lerBanco, escreverBanco } = require('../repositories/jsonDatabase');
+const { Op } = require('sequelize');
+const Expense = require('../models/Expense');
 const { httpError } = require('../utils/errors');
 const { validarMesReferencia, mesReferenciaAnterior } = require('../utils/month');
 
@@ -34,67 +35,51 @@ function validarDadosDespesa(dadosRecebidos, opcoes = {}) {
   };
 }
 
-function listarDespesas(usuarioId, mesReferencia) {
+async function listarDespesas(usuarioId, mesReferencia) {
   const erroMes = mesReferencia ? validarMesReferencia(mesReferencia) : null;
 
   if (erroMes) {
     throw httpError(400, erroMes);
   }
 
-  const banco = lerBanco();
+  const where = { usuarioId };
+  if (mesReferencia) where.mesReferencia = mesReferencia;
 
-  return banco.despesas.filter((despesa) => {
-    const pertenceAoUsuario = despesa.usuarioId === usuarioId;
-    const pertenceAoMes = !mesReferencia || despesa.mesReferencia === mesReferencia;
-    return pertenceAoUsuario && pertenceAoMes;
-  });
+  const despesas = await Expense.findAll({ where });
+  return despesas.map((d) => d.toJSON());
 }
 
-function criarDespesa(usuarioId, dadosRecebidos) {
+async function criarDespesa(usuarioId, dadosRecebidos) {
   const dadosValidados = validarDadosDespesa(dadosRecebidos);
-  const banco = lerBanco();
-  const agora = new Date().toISOString();
+  const agora = new Date();
 
-  const despesa = {
+  const despesa = await Expense.create({
     id: randomUUID(),
     usuarioId,
     ...dadosValidados,
     criadoEm: agora,
     atualizadoEm: agora,
-  };
+  });
 
-  banco.despesas.push(despesa);
-  escreverBanco(banco);
-
-  return despesa;
+  return despesa.toJSON();
 }
 
-function atualizarDespesa(usuarioId, despesaId, dadosRecebidos) {
+async function atualizarDespesa(usuarioId, despesaId, dadosRecebidos) {
   const dadosValidados = validarDadosDespesa(dadosRecebidos, { bloquearMesAnterior: false });
-  const banco = lerBanco();
-  const indice = banco.despesas.findIndex((despesa) => despesa.id === despesaId && despesa.usuarioId === usuarioId);
 
-  if (indice === -1) {
+  const despesa = await Expense.findOne({ where: { id: despesaId, usuarioId } });
+
+  if (!despesa) {
     throw httpError(404, 'Despesa não encontrada!');
   }
 
-  const despesaAtual = banco.despesas[indice];
+  await despesa.update({ ...dadosValidados, atualizadoEm: new Date() });
 
-  const despesaAtualizada = {
-    ...despesaAtual,
-    ...dadosValidados,
-    atualizadoEm: new Date().toISOString(),
-  };
-
-  banco.despesas[indice] = despesaAtualizada;
-  escreverBanco(banco);
-
-  return despesaAtualizada;
+  return despesa.toJSON();
 }
 
-function excluirDespesa(usuarioId, despesaId) {
-  const banco = lerBanco();
-  const despesa = banco.despesas.find((item) => item.id === despesaId && item.usuarioId === usuarioId);
+async function excluirDespesa(usuarioId, despesaId) {
+  const despesa = await Expense.findOne({ where: { id: despesaId, usuarioId } });
 
   if (!despesa) {
     throw httpError(404, 'Despesa não encontrada!');
@@ -104,8 +89,7 @@ function excluirDespesa(usuarioId, despesaId) {
     throw httpError(400, 'Não é permitido excluir despesas de meses anteriores!');
   }
 
-  banco.despesas = banco.despesas.filter((item) => item.id !== despesaId);
-  escreverBanco(banco);
+  await despesa.destroy();
 }
 
 module.exports = {
