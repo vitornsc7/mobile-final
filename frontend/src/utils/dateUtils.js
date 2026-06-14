@@ -56,3 +56,16 @@ export function mesReferenciaAnterior(mesReferencia) {
 export function validarMesReferencia(mesReferencia) {
   return /^\d{4}-(0[1-9]|1[0-2])$/.test(mesReferencia);
 }
+
+export function isoParaBR(data) {
+  if (!data) return '—';
+  const [ano, mes, dia] = data.split('-');
+  if (!dia) return data;
+  return `${dia}/${mes}/${ano}`;
+}
+
+export function brParaISO(data) {
+  if (!data || data.length !== 10) return '';
+  const [dia, mes, ano] = data.split('/');
+  return `${ano}-${mes}-${dia}`;
+}

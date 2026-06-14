@@ -6,6 +6,7 @@ import { formatarMoeda } from '../utils/currencyUtils';
 import { gerarMesesDisponiveis, obterMesReferenciaAtual } from '../utils/dateUtils';
 
 export function TelaInicio({
+  usuario,
   mesSelecionado,
   mesesCadastrados,
   seletorMesAberto,
@@ -61,11 +62,11 @@ export function TelaInicio({
     <View>
       <View style={estilos.cabecalho}>
         <View>
-          <Text style={estilos.saudacao}>Olá, João</Text>
+          <Text style={estilos.saudacao}>Olá, {usuario?.nome ?? ''}</Text>
           <Text style={estilos.textoAjuda}>Seu painel financeiro em tempo real.</Text>
         </View>
         <View style={estilos.avatar}>
-          <Text style={estilos.avatarTexto}>J</Text>
+          <Text style={estilos.avatarTexto}>{usuario?.nome?.charAt(0)?.toUpperCase() ?? '?'}</Text>
         </View>
       </View>
 

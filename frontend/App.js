@@ -5,11 +5,19 @@ import { TelaInicio } from './src/screens/TelaInicio';
 import { TelaDespesa } from './src/screens/TelaDespesa';
 import { TelaLimite } from './src/screens/TelaLimite';
 import { TelaPerfil } from './src/screens/TelaPerfil';
+import { LoginScreen } from './src/screens/LoginScreen';
+import { SignupScreen } from './src/screens/SignupScreen';
 import { requisicaoApi } from './src/services/api';
+import { getMe } from './src/services/authService';
+import { obterUsuario, limparAuth } from './src/utils/storage';
 import { CORES } from './src/theme/colors';
 import { obterMesReferenciaAtual, mesReferenciaAnterior, validarMesReferencia } from './src/utils/dateUtils';
 
 export default function App() {
+  const [usuario, definirUsuario] = useState(null);
+  const [verificandoAuth, definirVerificandoAuth] = useState(true);
+  const [telaAuth, definirTelaAuth] = useState('login');
+
   const [telaAtiva, definirTelaAtiva] = useState('inicio');
   const [mesSelecionado, definirMesSelecionado] = useState('');
   const [mesesCadastrados, definirMesesCadastrados] = useState([]);
@@ -29,6 +37,55 @@ export default function App() {
     valor: '',
     mesReferencia: obterMesReferenciaAtual(),
   });
+
+  useEffect(() => {
+    async function verificarSessao() {
+      try {
+        const usuarioSalvo = await obterUsuario();
+        if (usuarioSalvo) {
+          const dadosAtuais = await getMe();
+          definirUsuario(dadosAtuais);
+        }
+      } catch {
+        await limparAuth();
+      } finally {
+        definirVerificandoAuth(false);
+      }
+    }
+
+    verificarSessao();
+  }, []);
+
+  useEffect(() => {
+    if (!usuario) return;
+
+    async function iniciarTela() {
+      try {
+        await carregarMesesCadastrados();
+        definirDespesas([]);
+        definirLimites([]);
+      } catch (erro) {
+        Alert.alert('Erro', erro.message);
+      }
+    }
+
+    iniciarTela();
+  }, [usuario]);
+
+  function aoAutenticar(user) {
+    definirUsuario(user);
+  }
+
+  async function aoSair() {
+    await limparAuth();
+    definirUsuario(null);
+    definirTelaAtiva('inicio');
+    definirMesSelecionado('');
+    definirMesesCadastrados([]);
+    definirDespesas([]);
+    definirLimites([]);
+    definirTelaAuth('login');
+  }
 
   const totalDespesas = useMemo(() => {
     return despesas.reduce((total, despesa) => total + Number(despesa.valor), 0);
@@ -89,20 +146,6 @@ export default function App() {
       definirCarregando(false);
     }
   }
-
-  useEffect(() => {
-    async function iniciarTela() {
-      try {
-        await carregarMesesCadastrados();
-        definirDespesas([]);
-        definirLimites([]);
-      } catch (erro) {
-        Alert.alert('Erro', erro.message);
-      }
-    }
-
-    iniciarTela();
-  }, []);
 
   function alterarFormularioDespesa(campo, valor) {
     definirFormularioDespesa((atual) => ({ ...atual, [campo]: valor }));
@@ -318,6 +361,7 @@ export default function App() {
     if (telaAtiva === 'inicio') {
       return (
         <TelaInicio
+          usuario={usuario}
           mesSelecionado={mesSelecionado}
           mesesCadastrados={mesesCadastrados}
           seletorMesAberto={seletorMesAberto}
@@ -378,7 +422,32 @@ export default function App() {
       );
     }
 
-    return <TelaPerfil />;
+    return <TelaPerfil usuario={usuario} aoSair={aoSair} />;
+  }
+
+  if (verificandoAuth) {
+    return (
+      <View style={estilos.centrado}>
+        <ActivityIndicator size="large" color={CORES.verde} />
+      </View>
+    );
+  }
+
+  if (!usuario) {
+    if (telaAuth === 'cadastro') {
+      return (
+        <SignupScreen
+          aoAutenticar={aoAutenticar}
+          aoIrParaLogin={() => definirTelaAuth('login')}
+        />
+      );
+    }
+    return (
+      <LoginScreen
+        aoAutenticar={aoAutenticar}
+        aoIrParaCadastro={() => definirTelaAuth('cadastro')}
+      />
+    );
   }
 
   return (
@@ -393,5 +462,11 @@ const estilos = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  centrado: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: CORES.superficie,
   },
 });
