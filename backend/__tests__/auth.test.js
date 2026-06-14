@@ -262,3 +262,148 @@ describe('GET /users/me (rota protegida)', () => {
     expect(res.body.senha).toBeUndefined();
   });
 });
+
+
+describe('services/authService — signup() validações de campos', () => {
+  test('rejeita nome ausente com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, nome: '' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita nome só com espaços com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, nome: '   ' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita email inválido ("abc") com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, email: 'abc' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita email ausente com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, email: '' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita senha curta ("123") com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, senha: '123' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita senha ausente com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, senha: '' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita dataNascimento ausente com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, dataNascimento: '' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita dataNascimento futura com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, dataNascimento: '2099-01-01' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita dataNascimento em formato inválido ("09/12/1987") com status 400', async () => {
+    await expect(
+      authService.signup({ ...usuarioValido, dataNascimento: '09/12/1987' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('signup válido ainda retorna token e usuário (sem regressão)', async () => {
+    const res = await authService.signup(usuarioValido);
+    expect(res.token).toBeTruthy();
+    expect(res.user.email).toBe('joao@gmail.com');
+  });
+
+  test('email duplicado continua retornando 409', async () => {
+    await authService.signup(usuarioValido);
+    await expect(authService.signup(usuarioValido)).rejects.toMatchObject({ status: 409 });
+  });
+});
+
+
+describe('services/authService — signin() validações de campos', () => {
+  test('rejeita email ausente com status 400', async () => {
+    await expect(
+      authService.signin({ email: '', senha: 'senha123' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('rejeita senha ausente com status 400', async () => {
+    await expect(
+      authService.signin({ email: 'joao@gmail.com', senha: '' })
+    ).rejects.toMatchObject({ status: 400 });
+  });
+
+  test('senha errada continua retornando 401', async () => {
+    await authService.signup(usuarioValido);
+    await expect(
+      authService.signin({ email: 'joao@gmail.com', senha: 'errada' })
+    ).rejects.toMatchObject({ status: 401 });
+  });
+});
+
+
+describe('POST /auth/signup — validações de campos', () => {
+  test('400 sem nome', async () => {
+    const res = await request(app)
+      .post('/auth/signup')
+      .send({ ...usuarioValido, nome: '' });
+    expect(res.status).toBe(400);
+  });
+
+  test('400 com email inválido', async () => {
+    const res = await request(app)
+      .post('/auth/signup')
+      .send({ ...usuarioValido, email: 'abc' });
+    expect(res.status).toBe(400);
+  });
+
+  test('400 com senha curta', async () => {
+    const res = await request(app)
+      .post('/auth/signup')
+      .send({ ...usuarioValido, senha: '123' });
+    expect(res.status).toBe(400);
+  });
+
+  test('400 sem dataNascimento', async () => {
+    const res = await request(app)
+      .post('/auth/signup')
+      .send({ ...usuarioValido, dataNascimento: '' });
+    expect(res.status).toBe(400);
+  });
+
+  test('400 com dataNascimento futura', async () => {
+    const res = await request(app)
+      .post('/auth/signup')
+      .send({ ...usuarioValido, dataNascimento: '2099-01-01' });
+    expect(res.status).toBe(400);
+  });
+});
+
+
+describe('POST /auth/signin — validações de campos', () => {
+  test('400 sem email', async () => {
+    const res = await request(app)
+      .post('/auth/signin')
+      .send({ email: '', senha: 'senha123' });
+    expect(res.status).toBe(400);
+  });
+
+  test('400 sem senha', async () => {
+    const res = await request(app)
+      .post('/auth/signin')
+      .send({ email: 'joao@gmail.com', senha: '' });
+    expect(res.status).toBe(400);
+  });
+});
