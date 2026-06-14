@@ -26,7 +26,7 @@ export function TelaInicio({
   const mesTemFinancas = mesSelecionado && mesesCadastrados.includes(mesSelecionado);
   const progressoNaoEncontrado = Boolean(mesSelecionado) && !mesTemFinancas;
 
-  let titulo = 'Nenhuma fiança registrada';
+  let titulo = 'Nenhuma finança registrada';
   let mensagem = 'Cadastre um limite e registre suas despesas para acompanhar sua evolução.';
   let resultado = '';
   let status = 'Comece agora';
