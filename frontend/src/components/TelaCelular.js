@@ -5,11 +5,11 @@ import { CORES } from '../theme/colors';
 
 export function TelaCelular({ children, telaAtiva, aoTrocarTela }) {
   return (
-    <SafeAreaView style={estilos.fundoAplicativo}>
+    <SafeAreaView style={estilos.fundo}>
       <StatusBar style="dark" />
-      <View style={estilos.celular}>
+      <View style={estilos.container}>
         <ScrollView
-          contentContainerStyle={estilos.conteudoCelular}
+          contentContainerStyle={estilos.conteudo}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
@@ -23,20 +23,18 @@ export function TelaCelular({ children, telaAtiva, aoTrocarTela }) {
 }
 
 const estilos = StyleSheet.create({
-  fundoAplicativo: {
+  fundo: {
     flex: 1,
-    backgroundColor: CORES.fundoElevado,
+    backgroundColor: CORES.fundo,
   },
-  celular: {
+  container: {
     flex: 1,
-    width: '100%',
-    backgroundColor: CORES.fundoElevado,
-    overflow: 'hidden',
+    backgroundColor: CORES.fundo,
   },
-  conteudoCelular: {
+  conteudo: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 34,
-    paddingBottom: 140,
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 90,
   },
 });

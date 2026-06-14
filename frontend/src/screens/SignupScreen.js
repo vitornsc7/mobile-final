@@ -30,42 +30,24 @@ export function SignupScreen({ aoAutenticar, aoIrParaLogin }) {
     const mes = Number(mesStr);
     const ano = Number(anoStr);
     const anoAtual = new Date().getFullYear();
-
     if (mes < 1 || mes > 12) return 'Mês inválido.';
     if (ano < 1900 || ano > anoAtual) return 'Ano inválido.';
-
     const dataObj = new Date(ano, mes - 1, dia);
-    if (
-      dataObj.getFullYear() !== ano ||
-      dataObj.getMonth() + 1 !== mes ||
-      dataObj.getDate() !== dia
-    ) {
+    if (dataObj.getFullYear() !== ano || dataObj.getMonth() + 1 !== mes || dataObj.getDate() !== dia)
       return 'Data inválida.';
-    }
-
     if (dataObj > new Date()) return 'Data não pode ser futura.';
     return null;
   }
 
   async function cadastrar() {
     definirErro('');
-
     if (!nome.trim() || !email.trim() || !dataNascimento.trim() || !senha.trim() || !confirmarSenha.trim()) {
       definirErro('Preencha todos os campos.');
       return;
     }
-
     const erroData = validarDataBR(dataNascimento);
-    if (erroData) {
-      definirErro(erroData);
-      return;
-    }
-
-    if (senha !== confirmarSenha) {
-      definirErro('As senhas não coincidem.');
-      return;
-    }
-
+    if (erroData) { definirErro(erroData); return; }
+    if (senha !== confirmarSenha) { definirErro('As senhas não coincidem.'); return; }
     definirCarregando(true);
     try {
       const { token, user } = await signup({
@@ -86,56 +68,50 @@ export function SignupScreen({ aoAutenticar, aoIrParaLogin }) {
   return (
     <SafeAreaView style={estilos.fundo}>
       <ScrollView contentContainerStyle={estilos.container} keyboardShouldPersistTaps="handled">
-        <View style={estilos.cabecalho}>
-          <Text style={estilos.titulo}>CRIAR</Text>
+        <View style={estilos.topo}>
+          <View style={estilos.tag}>
+            <Text style={estilos.tagTexto}>Nova conta</Text>
+          </View>
+          <Text style={estilos.titulo}>Criar{' \n'}conta.</Text>
         </View>
 
-        <Campo
-          rotulo="Nome"
-          valor={nome}
-          aoAlterarTexto={definirNome}
-          dica="Seu nome completo"
-        />
-        <Campo
-          rotulo="Email"
-          valor={email}
-          aoAlterarTexto={definirEmail}
-          dica="seu@email.com"
-          tipoTeclado="email-address"
-        />
-        <Campo
-          rotulo="Data de nascimento"
-          valor={dataNascimento}
-          aoAlterarTexto={(v) => definirDataNascimento(aplicarMascaraData(v))}
-          dica="dd/mm/aaaa"
-          tipoTeclado="numeric"
-        />
-        <Campo
-          rotulo="Senha"
-          valor={senha}
-          aoAlterarTexto={definirSenha}
-          dica="Mínimo 6 caracteres"
-          seguro
-        />
-        <Campo
-          rotulo="Confirmar senha"
-          valor={confirmarSenha}
-          aoAlterarTexto={definirConfirmarSenha}
-          dica="Repita a senha"
-          seguro
-        />
+        <View style={estilos.form}>
+          <Campo rotulo="Nome" valor={nome} aoAlterarTexto={definirNome} dica="Seu nome completo" />
+          <Campo
+            rotulo="Email"
+            valor={email}
+            aoAlterarTexto={definirEmail}
+            dica="seu@email.com"
+            tipoTeclado="email-address"
+          />
+          <Campo
+            rotulo="Data de nascimento"
+            valor={dataNascimento}
+            aoAlterarTexto={(v) => definirDataNascimento(aplicarMascaraData(v))}
+            dica="dd/mm/aaaa"
+            tipoTeclado="numeric"
+          />
+          <Campo rotulo="Senha" valor={senha} aoAlterarTexto={definirSenha} dica="Mínimo 6 caracteres" seguro />
+          <Campo
+            rotulo="Confirmar senha"
+            valor={confirmarSenha}
+            aoAlterarTexto={definirConfirmarSenha}
+            dica="Repita a senha"
+            seguro
+          />
+          {!!erro && <Text style={estilos.textoErro}>{erro}</Text>}
+          <Pressable style={estilos.botao} onPress={cadastrar} disabled={carregando}>
+            {carregando
+              ? <ActivityIndicator color={CORES.preto} />
+              : <Text style={estilos.textoBotao}>Criar conta</Text>}
+          </Pressable>
+        </View>
 
-        {!!erro && <Text style={estilos.textoErro}>{erro}</Text>}
-
-        <Pressable style={estilos.botaoPrincipal} onPress={cadastrar} disabled={carregando}>
-          {carregando
-            ? <ActivityIndicator color={CORES.branco} />
-            : <Text style={estilos.textoBotaoPrincipal}>CRIAR</Text>
-          }
-        </Pressable>
-
-        <Pressable style={estilos.linkLogin} onPress={aoIrParaLogin}>
-          <Text style={estilos.textoLink}>Voltar</Text>
+        <Pressable style={estilos.linkArea} onPress={aoIrParaLogin}>
+          <Text style={estilos.textoLink}>
+            Já tem conta?{' '}
+            <Text style={estilos.textoLinkDestaque}>Entrar</Text>
+          </Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
@@ -145,57 +121,80 @@ export function SignupScreen({ aoAutenticar, aoIrParaLogin }) {
 const estilos = StyleSheet.create({
   fundo: {
     flex: 1,
-    backgroundColor: CORES.superficie,
+    backgroundColor: CORES.branco,
   },
   container: {
     flexGrow: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     paddingTop: 60,
     paddingBottom: 40,
   },
-  cabecalho: {
-    alignItems: 'center',
+  topo: {
     marginBottom: 36,
+  },
+  tag: {
+    alignSelf: 'flex-start',
+    backgroundColor: CORES.acento,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 4,
+    marginBottom: 18,
+  },
+  tagTexto: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 11,
+    fontWeight: '800',
+    color: CORES.preto,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
   titulo: {
     fontFamily: FONTE_PRINCIPAL,
-    color: CORES.texto,
-    fontSize: 40,
+    fontSize: 52,
     fontWeight: '900',
-    letterSpacing: 2,
+    color: CORES.preto,
+    letterSpacing: -2,
+    lineHeight: 54,
+  },
+  form: {
+    marginBottom: 8,
   },
   textoErro: {
+    fontFamily: FONTE_PRINCIPAL,
     color: CORES.vermelho,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '600',
     marginBottom: 12,
-    textAlign: 'center',
   },
-  botaoPrincipal: {
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: CORES.verde,
+  botao: {
+    height: 56,
+    backgroundColor: CORES.acento,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    shadowColor: CORES.verde,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 5,
   },
-  textoBotaoPrincipal: {
-    color: CORES.branco,
+  textoBotao: {
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.preto,
     fontSize: 15,
     fontWeight: '900',
+    textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  linkLogin: {
+  linkArea: {
     alignItems: 'center',
     paddingVertical: 20,
   },
   textoLink: {
-    color: CORES.textoSuave,
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.cinzaEscuro,
     fontWeight: '600',
+    fontSize: 14,
+  },
+  textoLinkDestaque: {
+    color: CORES.preto,
+    fontWeight: '900',
+    textDecorationLine: 'underline',
   },
 });

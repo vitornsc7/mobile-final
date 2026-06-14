@@ -55,14 +55,14 @@ async function signup({ nome, email, senha, dataNascimento }) {
   const hash = await bcrypt.hash(senha, 8);
   const token = gerarToken();
 
-  const user = userRepository.create({
+  const user = await userRepository.create({
     id: 'u_' + Date.now(),
     nome: nome.trim(),
     email: emailNormalizado,
     senha: hash,
     dataNascimento,
     token,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(),
   });
 
   return { token, user: publicUser(user) };
@@ -81,7 +81,7 @@ async function signin({ email, senha }) {
   }
 
   user.token = gerarToken();
-  userRepository.update(user);
+  await userRepository.update(user);
 
   return { token: user.token, user: publicUser(user) };
 }

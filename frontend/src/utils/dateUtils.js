@@ -58,7 +58,7 @@ export function validarMesReferencia(mesReferencia) {
 }
 
 export function isoParaBR(data) {
-  if (!data) return '—';
+  if (!data) return '-';
   const [ano, mes, dia] = data.split('-');
   if (!dia) return data;
   return `${dia}/${mes}/${ano}`;
