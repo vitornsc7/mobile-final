@@ -21,7 +21,6 @@ export default function App() {
   const [telaAtiva, definirTelaAtiva] = useState('inicio');
   const [mesSelecionado, definirMesSelecionado] = useState('');
   const [mesesCadastrados, definirMesesCadastrados] = useState([]);
-  const [seletorMesAberto, definirSeletorMesAberto] = useState(false);
   const [despesas, definirDespesas] = useState([]);
   const [limites, definirLimites] = useState([]);
   const [carregando, definirCarregando] = useState(false);
@@ -31,7 +30,7 @@ export default function App() {
   const [formularioDespesa, definirFormularioDespesa] = useState({
     descricao: '',
     valor: '',
-    mesReferencia: '',
+    mesReferencia: obterMesReferenciaAtual(),
   });
   const [formularioLimite, definirFormularioLimite] = useState({
     valor: '',
@@ -178,13 +177,8 @@ export default function App() {
   }
 
   async function selecionarMesCadastrado(mes) {
-    definirSeletorMesAberto(false);
     definirMesSelecionado(mes);
     await carregarDados(mes);
-  }
-
-  function alternarSeletorMes() {
-    definirSeletorMesAberto((atual) => !atual);
   }
 
   async function salvarDespesa() {
@@ -222,7 +216,7 @@ export default function App() {
       }
 
       definirMesSelecionado(dadosDespesa.mesReferencia);
-      definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: '' });
+      definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: dadosDespesa.mesReferencia });
       definirDespesaEmEdicao(null);
       await carregarMesesCadastrados();
       await carregarDados(dadosDespesa.mesReferencia);
@@ -352,7 +346,6 @@ export default function App() {
   }
 
   function trocarTela(tela) {
-    definirSeletorMesAberto(false);
     definirTelaAtiva(tela);
   }
 
@@ -371,11 +364,8 @@ export default function App() {
           usuario={usuario}
           mesSelecionado={mesSelecionado}
           mesesCadastrados={mesesCadastrados}
-          seletorMesAberto={seletorMesAberto}
           totalDespesas={totalDespesas}
           limiteAtual={limiteAtual}
-          aoAbrirSeletorMes={alternarSeletorMes}
-          aoFecharSeletorMes={() => definirSeletorMesAberto(false)}
           aoSelecionarMes={selecionarMesCadastrado}
           aoIrParaDespesa={() => trocarTela('despesas')}
           aoIrParaLimite={() => trocarTela('limites')}
@@ -387,10 +377,6 @@ export default function App() {
       return (
         <TelaDespesa
           mesSelecionado={mesSelecionado}
-          mesesCadastrados={mesesCadastrados}
-          seletorMesAberto={seletorMesAberto}
-          aoAbrirSeletorMes={alternarSeletorMes}
-          aoFecharSeletorMes={() => definirSeletorMesAberto(false)}
           aoSelecionarMes={selecionarMesCadastrado}
           despesas={despesas}
           formularioDespesa={formularioDespesa}
@@ -401,7 +387,7 @@ export default function App() {
           aoExcluir={excluirDespesa}
           aoCancelarEdicao={() => {
             definirDespesaEmEdicao(null);
-            definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: '' });
+            definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: mesSelecionado || obterMesReferenciaAtual() });
           }}
         />
       );

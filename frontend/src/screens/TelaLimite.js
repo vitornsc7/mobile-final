@@ -1,11 +1,10 @@
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Campo } from '../components/Campo';
-import { ChevronDown } from '../components/ChevronDown';
+import { SeletorMesAno } from '../components/SeletorMesAno';
 import { CORES } from '../theme/colors';
 import { FONTE_PRINCIPAL } from '../theme/typography';
 import { formatarMoeda } from '../utils/currencyUtils';
-import { formatarMesReferencia, gerarMesesDisponiveis } from '../utils/dateUtils';
+import { formatarMesReferencia } from '../utils/dateUtils';
 
 export function TelaLimite({
   mesSelecionado,
@@ -20,27 +19,6 @@ export function TelaLimite({
   aoSelecionarMesConsulta,
   aoCancelarEdicao,
 }) {
-  const [seletorMesFormularioAberto, definirSeletorMesFormularioAberto] = useState(false);
-  const [seletorMesConsultaAberto, definirSeletorMesConsultaAberto] = useState(false);
-  const mesesDisponiveis = gerarMesesDisponiveis();
-
-  function selecionarMesFormulario(mesReferencia) {
-    aoAlterarFormulario('mesReferencia', mesReferencia);
-    definirSeletorMesFormularioAberto(false);
-  }
-
-  function alternarSeletorMesFormulario() {
-    definirSeletorMesFormularioAberto((atual) => !atual);
-  }
-
-  function selecionarMesConsulta(mesReferencia) {
-    definirSeletorMesConsultaAberto(false);
-    aoSelecionarMesConsulta(mesReferencia);
-  }
-
-  function alternarSeletorMesConsulta() {
-    definirSeletorMesConsultaAberto((atual) => !atual);
-  }
 
   return (
     <View style={estilos.telaFormulario}>
@@ -67,44 +45,11 @@ export function TelaLimite({
         {Boolean(mensagemErro) && <Text style={estilos.mensagemErro}>{mensagemErro}</Text>}
 
         <View style={estilos.campo}>
-          <Text style={estilos.rotulo}>Mês</Text>
-          <Pressable
-            style={[estilos.entradaSelectMes, seletorMesFormularioAberto && estilos.entradaSelectMesAberta]}
-            onPress={alternarSeletorMesFormulario}
-          >
-            <Text style={formularioLimite.mesReferencia ? estilos.textoSelectMes : estilos.textoSelectMesVazio}>
-              {formularioLimite.mesReferencia
-                ? formatarMesReferencia(formularioLimite.mesReferencia, false)
-                : 'Selecione um mês'}
-            </Text>
-            <ChevronDown style={estilos.chevronSelectMes} />
-          </Pressable>
-
-          {seletorMesFormularioAberto && (
-            <View style={estilos.dropdownContainer}>
-              <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
-                {mesesDisponiveis.map((mes) => (
-                  <Pressable
-                    key={mes.valor}
-                    style={[
-                      estilos.opcaoMes,
-                      mes.valor === formularioLimite.mesReferencia && estilos.opcaoMesAtiva,
-                    ]}
-                    onPress={() => selecionarMesFormulario(mes.valor)}
-                  >
-                    <Text
-                      style={[
-                        estilos.textoOpcaoMes,
-                        mes.valor === formularioLimite.mesReferencia && estilos.textoOpcaoMesAtiva,
-                      ]}
-                    >
-                      {mes.rotulo}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+          <Text style={estilos.rotulo}>Mês de referência</Text>
+          <SeletorMesAno
+            valor={formularioLimite.mesReferencia}
+            aoSelecionar={(v) => aoAlterarFormulario('mesReferencia', v)}
+          />
         </View>
 
         <Pressable style={estilos.botaoPrincipal} onPress={aoSalvar}>
@@ -124,33 +69,7 @@ export function TelaLimite({
         </View>
       </View>
 
-      <Pressable
-        style={[estilos.entradaSelectMesConsulta, seletorMesConsultaAberto && estilos.entradaSelectMesAberta]}
-        onPress={alternarSeletorMesConsulta}
-      >
-        <Text style={mesSelecionado ? estilos.textoSelectMes : estilos.textoSelectMesVazio}>
-          {mesSelecionado ? formatarMesReferencia(mesSelecionado, false) : 'Selecione um mês'}
-        </Text>
-        <ChevronDown style={estilos.chevronSelectMes} />
-      </Pressable>
-
-      {seletorMesConsultaAberto && (
-        <View style={estilos.dropdownHistoricoContainer}>
-          <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
-            {mesesDisponiveis.map((mes) => (
-              <Pressable
-                key={mes.valor}
-                style={[estilos.opcaoMes, mes.valor === mesSelecionado && estilos.opcaoMesAtiva]}
-                onPress={() => selecionarMesConsulta(mes.valor)}
-              >
-                <Text style={[estilos.textoOpcaoMes, mes.valor === mesSelecionado && estilos.textoOpcaoMesAtiva]}>
-                  {mes.rotulo}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+      <SeletorMesAno valor={mesSelecionado} aoSelecionar={aoSelecionarMesConsulta} />
 
       {limites.length === 0 ? (
         <View style={estilos.estadoVazio}>
@@ -164,7 +83,7 @@ export function TelaLimite({
               <Text style={estilos.iconeLimiteTexto}>R$</Text>
             </View>
             <View style={estilos.principalHistorico}>
-              <Text style={estilos.tituloHistorico}>{formatarMesReferencia(limite.mesReferencia, false)}</Text>
+              <Text style={estilos.tituloHistorico}>{formatarMesReferencia(limite.mesReferencia, true)}</Text>
               <Text style={estilos.subtituloHistorico}>Orçamento mensal</Text>
               <View style={estilos.acoesHistorico}>
                 <Pressable style={estilos.botaoAcao} onPress={() => aoEditar(limite)}>

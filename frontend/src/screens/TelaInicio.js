@@ -1,29 +1,20 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ChevronDown } from '../components/ChevronDown';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { SeletorMesAno } from '../components/SeletorMesAno';
 import { CORES } from '../theme/colors';
 import { FONTE_PRINCIPAL } from '../theme/typography';
 import { formatarMoeda } from '../utils/currencyUtils';
-import { formatarMesReferencia, obterMesReferenciaAtual } from '../utils/dateUtils';
+import { obterMesReferenciaAtual } from '../utils/dateUtils';
 
 export function TelaInicio({
   usuario,
   mesSelecionado,
   mesesCadastrados,
-  seletorMesAberto,
   totalDespesas,
   limiteAtual,
-  aoAbrirSeletorMes,
-  aoFecharSeletorMes,
   aoSelecionarMes,
   aoIrParaDespesa,
   aoIrParaLimite,
 }) {
-  const mesesDisponiveis = mesesCadastrados.map((valor) => ({
-    valor,
-    rotulo: formatarMesReferencia(valor, true),
-  }));
-  const mesSelecionadoRotulo = mesesDisponiveis.find((mes) => mes.valor === mesSelecionado)?.rotulo || mesSelecionado;
-  const aoAlternarSeletorMes = seletorMesAberto ? aoFecharSeletorMes : aoAbrirSeletorMes;
   const possuiLimite = Boolean(limiteAtual);
   const valorLimite = Number(limiteAtual?.valor || 0);
   const mesFinalizado = mesSelecionado < obterMesReferenciaAtual();
@@ -73,42 +64,10 @@ export function TelaInicio({
         </View>
       </View>
 
-      {mesesDisponiveis.length > 0 && (
-        <View style={estilos.blocoMes}>
-          <Text style={estilos.rotuloCampo}>Período de análise</Text>
-          <View style={estilos.buscaMes}>
-            <Pressable
-              style={[estilos.entradaSelecao, seletorMesAberto && estilos.entradaSelecaoAberta]}
-              onPress={aoAlternarSeletorMes}
-            >
-              <Text style={mesSelecionado ? estilos.textoSelectMes : estilos.textoSelectMesVazio}>
-                {mesSelecionadoRotulo || 'Selecione o mês desejado'}
-              </Text>
-            </Pressable>
-            <Pressable style={estilos.botaoChevron} onPress={aoAlternarSeletorMes}>
-              <ChevronDown style={estilos.textoChevron} />
-            </Pressable>
-          </View>
-
-          {seletorMesAberto && (
-            <View style={estilos.dropdownContainer}>
-              <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
-                {mesesDisponiveis.map((mes) => (
-                  <Pressable
-                    key={mes.valor}
-                    style={[estilos.opcaoMes, mes.valor === mesSelecionado && estilos.opcaoMesAtiva]}
-                    onPress={() => aoSelecionarMes(mes.valor)}
-                  >
-                    <Text style={[estilos.textoOpcaoMes, mes.valor === mesSelecionado && estilos.textoOpcaoMesAtiva]}>
-                      {mes.rotulo}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          )}
-        </View>
-      )}
+      <View style={estilos.blocoMes}>
+        <Text style={estilos.rotuloCampo}>Período de análise</Text>
+        <SeletorMesAno valor={mesSelecionado} aoSelecionar={aoSelecionarMes} />
+      </View>
 
       <View style={[estilos.cartaoFeedback, estiloTom]}>
         <View style={estilos.linhaStatus}>

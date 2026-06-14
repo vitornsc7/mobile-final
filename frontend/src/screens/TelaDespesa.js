@@ -1,17 +1,14 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { ChevronDown } from '../components/ChevronDown';
+import { useMemo } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Campo } from '../components/Campo';
+import { SeletorMesAno } from '../components/SeletorMesAno';
 import { CORES } from '../theme/colors';
 import { FONTE_PRINCIPAL } from '../theme/typography';
 import { formatarMoeda } from '../utils/currencyUtils';
-import { formatarMesReferencia, gerarMesesDisponiveis } from '../utils/dateUtils';
+import { formatarMesReferencia } from '../utils/dateUtils';
 
 export function TelaDespesa({
   mesSelecionado,
-  seletorMesAberto,
-  aoAbrirSeletorMes,
-  aoFecharSeletorMes,
   aoSelecionarMes,
   despesas,
   formularioDespesa,
@@ -22,23 +19,7 @@ export function TelaDespesa({
   aoExcluir,
   aoCancelarEdicao,
 }) {
-  const [seletorMesFormularioAberto, definirSeletorMesFormularioAberto] = useState(false);
-  const mesesDisponiveis = gerarMesesDisponiveis();
-  const mesSelecionadoRotulo = mesSelecionado ? formatarMesReferencia(mesSelecionado, false) : '';
-  const aoAlternarSeletorHistorico = seletorMesAberto ? aoFecharSeletorMes : aoAbrirSeletorMes;
-  const mesFormularioRotulo = formularioDespesa.mesReferencia
-    ? formatarMesReferencia(formularioDespesa.mesReferencia, false)
-    : '';
   const totalHistorico = useMemo(() => despesas.reduce((total, despesa) => total + Number(despesa.valor), 0), [despesas]);
-
-  function selecionarMesFormulario(mesReferencia) {
-    aoAlterarFormulario('mesReferencia', mesReferencia);
-    definirSeletorMesFormularioAberto(false);
-  }
-
-  function alternarSeletorMesFormulario() {
-    definirSeletorMesFormularioAberto((atual) => !atual);
-  }
 
   return (
     <View style={estilos.telaFormulario}>
@@ -67,42 +48,11 @@ export function TelaDespesa({
           tipoTeclado="numeric"
         />
         <View style={estilos.campo}>
-          <Text style={estilos.rotulo}>Mês</Text>
-          <Pressable
-            style={[estilos.entradaSelectMes, seletorMesFormularioAberto && estilos.entradaSelecaoAberta]}
-            onPress={alternarSeletorMesFormulario}
-          >
-            <Text style={formularioDespesa.mesReferencia ? estilos.textoSelectMes : estilos.textoSelectMesVazio}>
-              {mesFormularioRotulo || 'Selecione um mês'}
-            </Text>
-            <ChevronDown style={estilos.chevronSelectMes} />
-          </Pressable>
-
-          {seletorMesFormularioAberto && (
-            <View style={estilos.dropdownFormularioContainer}>
-              <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
-                {mesesDisponiveis.map((mes) => (
-                  <Pressable
-                    key={mes.valor}
-                    style={[
-                      estilos.opcaoMes,
-                      mes.valor === formularioDespesa.mesReferencia && estilos.opcaoMesAtiva,
-                    ]}
-                    onPress={() => selecionarMesFormulario(mes.valor)}
-                  >
-                    <Text
-                      style={[
-                        estilos.textoOpcaoMes,
-                        mes.valor === formularioDespesa.mesReferencia && estilos.textoOpcaoMesAtiva,
-                      ]}
-                    >
-                      {mes.rotulo}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-          )}
+          <Text style={estilos.rotulo}>Mês de referência</Text>
+          <SeletorMesAno
+            valor={formularioDespesa.mesReferencia}
+            aoSelecionar={(v) => aoAlterarFormulario('mesReferencia', v)}
+          />
         </View>
 
         <Pressable style={estilos.botaoPrincipal} onPress={aoSalvar}>
@@ -127,36 +77,8 @@ export function TelaDespesa({
       </View>
 
       <View style={estilos.buscaMes}>
-        <Pressable
-          style={[estilos.entradaSelecao, seletorMesAberto && estilos.entradaSelecaoAberta]}
-          onPress={aoAlternarSeletorHistorico}
-        >
-          <Text style={mesSelecionado ? estilos.textoSelectMes : estilos.textoSelectMesVazio}>
-            {mesSelecionadoRotulo || 'Selecione um mês'}
-          </Text>
-        </Pressable>
-        <Pressable style={estilos.botaoChevron} onPress={aoAlternarSeletorHistorico}>
-          <ChevronDown style={estilos.textoChevron} />
-        </Pressable>
+        <SeletorMesAno valor={mesSelecionado} aoSelecionar={aoSelecionarMes} />
       </View>
-
-      {seletorMesAberto && (
-        <View style={estilos.dropdownContainer}>
-          <ScrollView style={estilos.dropdownScroll} showsVerticalScrollIndicator={false}>
-            {mesesDisponiveis.map((mes) => (
-              <Pressable
-                key={mes.valor}
-                style={[estilos.opcaoMes, mes.valor === mesSelecionado && estilos.opcaoMesAtiva]}
-                onPress={() => aoSelecionarMes(mes.valor)}
-              >
-                <Text style={[estilos.textoOpcaoMes, mes.valor === mesSelecionado && estilos.textoOpcaoMesAtiva]}>
-                  {mes.rotulo}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      )}
 
       {despesas.length === 0 ? (
         <View style={estilos.estadoVazio}>
@@ -171,7 +93,7 @@ export function TelaDespesa({
             </View>
             <View style={estilos.principalHistorico}>
               <Text style={estilos.tituloHistorico}>{despesa.descricao}</Text>
-              <Text style={estilos.subtituloHistorico}>{despesa.mesReferencia}</Text>
+              <Text style={estilos.subtituloHistorico}>{formatarMesReferencia(despesa.mesReferencia, true)}</Text>
               <View style={estilos.acoesHistorico}>
                 <Pressable style={estilos.botaoAcao} onPress={() => aoEditar(despesa)}>
                   <Text style={estilos.textoBotaoAcao}>Editar</Text>
