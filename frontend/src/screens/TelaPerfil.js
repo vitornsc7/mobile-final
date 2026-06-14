@@ -7,150 +7,155 @@ export function TelaPerfil({ usuario, aoSair }) {
   const inicial = usuario?.nome ? usuario.nome.charAt(0).toUpperCase() : '?';
 
   return (
-    <View style={estilos.telaPerfil}>
-      <View style={estilos.cabecalhoTela}>
+    <View style={estilos.tela}>
+      <View style={estilos.cabecalho}>
         <Text style={estilos.eyebrow}>Conta</Text>
-        <Text style={estilos.tituloTela}>Meus dados</Text>
-        <Text style={estilos.subtituloTela}>Informações básicas do perfil conectado.</Text>
+        <Text style={estilos.titulo}>Meus dados</Text>
+        <Text style={estilos.subtitulo}>Informações básicas do perfil conectado.</Text>
       </View>
 
       <View style={estilos.cartaoHero}>
-        <View style={estilos.avatarGrande}>
+        <View style={estilos.avatar}>
           <Text style={estilos.avatarTexto}>{inicial}</Text>
         </View>
-        <View style={estilos.resumoPerfil}>
-          <Text style={estilos.nomePerfil}>{usuario?.nome ?? '—'}</Text>
-          <Text style={estilos.emailPerfil}>{usuario?.email ?? '—'}</Text>
+        <View style={estilos.resumo}>
+          <Text style={estilos.nomeHero}>{usuario?.nome ?? '-'}</Text>
+          <Text style={estilos.emailHero}>{usuario?.email ?? '-'}</Text>
         </View>
       </View>
 
-      <View style={estilos.cardPerfil}>
-        <View style={estilos.linhaPerfil}>
-          <Text style={estilos.rotuloPerfil}>Nome</Text>
-          <Text style={estilos.valorPerfil}>{usuario?.nome ?? '—'}</Text>
+      <View style={estilos.cardDados}>
+        <View style={estilos.linha}>
+          <Text style={estilos.rotuloLinha}>Nome</Text>
+          <Text style={estilos.valorLinha}>{usuario?.nome ?? '-'}</Text>
         </View>
-
-        <View style={estilos.linhaPerfil}>
-          <Text style={estilos.rotuloPerfil}>E-mail</Text>
-          <Text style={estilos.valorPerfil}>{usuario?.email ?? '—'}</Text>
+        <View style={estilos.linha}>
+          <Text style={estilos.rotuloLinha}>E-mail</Text>
+          <Text style={estilos.valorLinha}>{usuario?.email ?? '-'}</Text>
         </View>
-
-        <View style={estilos.linhaPerfil}>
-          <Text style={estilos.rotuloPerfil}>Data de nascimento</Text>
-          <Text style={estilos.valorPerfil}>{isoParaBR(usuario?.dataNascimento)}</Text>
+        <View style={[estilos.linha, estilos.linhaUltima]}>
+          <Text style={estilos.rotuloLinha}>Data de nascimento</Text>
+          <Text style={estilos.valorLinha}>{isoParaBR(usuario?.dataNascimento)}</Text>
         </View>
-
-        <Pressable style={estilos.botaoPrincipal} onPress={aoSair}>
-          <Text style={estilos.textoBotaoPrincipal}>Sair da conta</Text>
-        </Pressable>
       </View>
+
+      <Pressable style={estilos.botaoSair} onPress={aoSair}>
+        <Text style={estilos.textoBotaoSair}>Sair da conta</Text>
+      </Pressable>
     </View>
   );
 }
 
 const estilos = StyleSheet.create({
-  telaPerfil: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    paddingVertical: 8,
-  },
-  cabecalhoTela: {
-    marginBottom: 22,
-  },
+  tela: { paddingVertical: 8 },
+  cabecalho: { marginBottom: 20 },
   eyebrow: {
-    color: CORES.roxo,
-    fontSize: 12,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-  },
-  tituloTela: {
     fontFamily: FONTE_PRINCIPAL,
-    color: CORES.texto,
-    fontSize: 32,
-    fontWeight: '900',
-    marginTop: 4,
+    fontSize: 11,
+    fontWeight: '700',
+    color: CORES.cinzaEscuro,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+    marginBottom: 4,
   },
-  subtituloTela: {
-    color: CORES.textoSuave,
-    marginTop: 6,
-    fontWeight: '600',
+  titulo: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 36,
+    fontWeight: '900',
+    color: CORES.preto,
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  subtitulo: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 13,
+    fontWeight: '500',
+    color: CORES.cinzaEscuro,
+    lineHeight: 18,
   },
   cartaoHero: {
-    backgroundColor: CORES.roxoClaro,
-    borderRadius: 26,
+    backgroundColor: CORES.preto,
+    borderRadius: 8,
     padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
-    overflow: 'hidden',
-    shadowColor: CORES.roxo,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    elevation: 7,
+    marginBottom: 12,
   },
-  avatarGrande: {
-    width: 64,
-    height: 64,
-    borderRadius: 22,
-    backgroundColor: CORES.branco,
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    backgroundColor: CORES.acento,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarTexto: {
-    color: CORES.roxoEscuro,
-    fontSize: 24,
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.preto,
+    fontSize: 26,
     fontWeight: '900',
   },
-  resumoPerfil: {
-    flex: 1,
-  },
-  nomePerfil: {
-    color: CORES.texto,
-    fontSize: 22,
+  resumo: { flex: 1 },
+  nomeHero: {
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.branco,
+    fontSize: 20,
     fontWeight: '900',
   },
-  emailPerfil: {
-    color: CORES.textoSuave,
-    marginTop: 5,
-    fontWeight: '700',
+  emailHero: {
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.cinzaEscuro,
+    fontSize: 13,
+    marginTop: 3,
+    fontWeight: '500',
   },
-  cardPerfil: {
-    marginTop: 16,
+  cardDados: {
     backgroundColor: CORES.branco,
-    borderRadius: 24,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: CORES.borda,
-    padding: 18,
+    overflow: 'hidden',
   },
-  linhaPerfil: {
+  linha: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: CORES.borda,
-    paddingVertical: 14,
   },
-  rotuloPerfil: {
-    color: CORES.textoSuave,
-    fontSize: 12,
-    fontWeight: '900',
+  linhaUltima: {
+    borderBottomWidth: 0,
+  },
+  rotuloLinha: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 11,
+    fontWeight: '700',
+    color: CORES.cinzaEscuro,
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
-  valorPerfil: {
-    color: CORES.texto,
-    marginTop: 6,
-    fontSize: 16,
-    fontWeight: '800',
+  valorLinha: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 15,
+    fontWeight: '700',
+    color: CORES.preto,
+    marginTop: 4,
   },
-  botaoPrincipal: {
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: CORES.verde,
+  botaoSair: {
+    height: 52,
+    borderWidth: 1.5,
+    borderColor: CORES.preto,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 22,
+    marginTop: 16,
   },
-  textoBotaoPrincipal: {
-    color: CORES.branco,
-    fontSize: 15,
+  textoBotaoSair: {
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.preto,
+    fontSize: 14,
     fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

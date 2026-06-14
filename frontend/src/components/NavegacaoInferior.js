@@ -4,6 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { CORES } from '../theme/colors';
+import { FONTE_PRINCIPAL } from '../theme/typography';
 
 export function NavegacaoInferior({ telaAtiva, aoTrocarTela }) {
   const itens = [
@@ -14,36 +15,25 @@ export function NavegacaoInferior({ telaAtiva, aoTrocarTela }) {
   ];
 
   function renderizarIcone(item, ativo) {
-    const corIcone = ativo ? CORES.textoInvertido : CORES.textoSuave;
-
-    if (item.tipo === 'entypo') {
-      return <Entypo name={item.icone} size={21} color={corIcone} />;
-    }
-
-    if (item.tipo === 'materialIcons') {
-      return <MaterialIcons name={item.icone} size={22} color={corIcone} />;
-    }
-
-    if (item.tipo === 'fontAwesome5') {
-      return <FontAwesome5 name={item.icone} size={18} color={corIcone} />;
-    }
-
-    return <FontAwesome6 name={item.icone} size={19} color={corIcone} />;
+    const cor = ativo ? CORES.preto : CORES.cinzaEscuro;
+    if (item.tipo === 'entypo') return <Entypo name={item.icone} size={20} color={cor} />;
+    if (item.tipo === 'materialIcons') return <MaterialIcons name={item.icone} size={21} color={cor} />;
+    if (item.tipo === 'fontAwesome5') return <FontAwesome5 name={item.icone} size={17} color={cor} />;
+    return <FontAwesome6 name={item.icone} size={18} color={cor} />;
   }
 
   return (
-    <View style={estilos.navegacaoInferior}>
+    <View style={estilos.nav}>
       {itens.map((item) => {
         const ativo = telaAtiva === item.chave;
-
         return (
           <Pressable
             key={item.chave}
-            style={[estilos.itemNavegacao, ativo && estilos.itemNavegacaoAtivo]}
+            style={[estilos.item, ativo && estilos.itemAtivo]}
             onPress={() => aoTrocarTela(item.chave)}
           >
             {renderizarIcone(item, ativo)}
-            <Text style={[estilos.rotuloItem, ativo && estilos.rotuloItemAtivo]}>{item.rotulo}</Text>
+            <Text style={[estilos.rotulo, ativo && estilos.rotuloAtivo]}>{item.rotulo}</Text>
           </Pressable>
         );
       })}
@@ -52,48 +42,38 @@ export function NavegacaoInferior({ telaAtiva, aoTrocarTela }) {
 }
 
 const estilos = StyleSheet.create({
-  navegacaoInferior: {
+  nav: {
     position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 18,
+    left: 0,
+    right: 0,
+    bottom: 0,
     height: 72,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
+    backgroundColor: CORES.preto,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 8,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(216, 196, 240, 0.9)',
-    shadowColor: CORES.sombra,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 8,
+    paddingBottom: 4,
   },
-  itemNavegacao: {
+  item: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
     height: 56,
-    borderRadius: 18,
-    gap: 4,
+    borderRadius: 6,
+    gap: 3,
   },
-  itemNavegacaoAtivo: {
-    backgroundColor: CORES.roxo,
-    shadowColor: CORES.roxo,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    elevation: 5,
+  itemAtivo: {
+    backgroundColor: CORES.acento,
   },
-  rotuloItem: {
-    color: CORES.textoSuave,
+  rotulo: {
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.cinzaEscuro,
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
-  rotuloItemAtivo: {
-    color: CORES.textoInvertido,
+  rotuloAtivo: {
+    color: CORES.preto,
+    fontWeight: '900',
   },
 });

@@ -325,6 +325,8 @@ export default function App() {
 
     try {
       await requisicaoApi(`/expenses/${despesa.id}`, { method: 'DELETE' });
+      definirDespesaEmEdicao(null);
+      definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: mesSelecionado || obterMesReferenciaAtual() });
       await atualizarMesAposExclusao();
     } catch (erro) {
       Alert.alert('Erro', erro.message);
@@ -339,6 +341,9 @@ export default function App() {
 
     try {
       await requisicaoApi(`/monthly-limits/${limite.id}`, { method: 'DELETE' });
+      definirLimiteEmEdicao(null);
+      definirMensagemErroLimite('');
+      definirFormularioLimite({ valor: '', mesReferencia: mesSelecionado || obterMesReferenciaAtual() });
       await atualizarMesAposExclusao();
     } catch (erro) {
       Alert.alert('Erro', erro.message);

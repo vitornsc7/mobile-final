@@ -18,7 +18,6 @@ export function LoginScreen({ aoAutenticar, aoIrParaCadastro }) {
       definirErro('Preencha e-mail e senha.');
       return;
     }
-
     definirCarregando(true);
     try {
       const { token, user } = await signin({ email: email.trim(), senha });
@@ -34,37 +33,40 @@ export function LoginScreen({ aoAutenticar, aoIrParaCadastro }) {
   return (
     <SafeAreaView style={estilos.fundo}>
       <ScrollView contentContainerStyle={estilos.container} keyboardShouldPersistTaps="handled">
-        <View style={estilos.cabecalho}>
-          <Text style={estilos.titulo}>ENTRAR</Text>
+        <View style={estilos.topo}>
+          <View style={estilos.tag}>
+            <Text style={estilos.tagTexto}>Finanças pessoais</Text>
+          </View>
+          <Text style={estilos.titulo}>Entrar.</Text>
         </View>
 
-        <Campo
-          rotulo="Email"
-          valor={email}
-          aoAlterarTexto={definirEmail}
-          dica="seu@email.com"
-          tipoTeclado="email-address"
-        />
-        <Campo
-          rotulo="Senha"
-          valor={senha}
-          aoAlterarTexto={definirSenha}
-          dica="Sua senha"
-          seguro
-        />
+        <View style={estilos.form}>
+          <Campo
+            rotulo="Email"
+            valor={email}
+            aoAlterarTexto={definirEmail}
+            dica="seu@email.com"
+            tipoTeclado="email-address"
+          />
+          <Campo
+            rotulo="Senha"
+            valor={senha}
+            aoAlterarTexto={definirSenha}
+            dica="Sua senha"
+            seguro
+          />
+          {!!erro && <Text style={estilos.textoErro}>{erro}</Text>}
+          <Pressable style={estilos.botao} onPress={entrar} disabled={carregando}>
+            {carregando
+              ? <ActivityIndicator color={CORES.preto} />
+              : <Text style={estilos.textoBotao}>Entrar</Text>}
+          </Pressable>
+        </View>
 
-        {!!erro && <Text style={estilos.textoErro}>{erro}</Text>}
-
-        <Pressable style={estilos.botaoPrincipal} onPress={entrar} disabled={carregando}>
-          {carregando
-            ? <ActivityIndicator color={CORES.branco} />
-            : <Text style={estilos.textoBotaoPrincipal}>ENTRAR</Text>
-          }
-        </Pressable>
-
-        <Pressable style={estilos.linkCadastro} onPress={aoIrParaCadastro}>
+        <Pressable style={estilos.linkArea} onPress={aoIrParaCadastro}>
           <Text style={estilos.textoLink}>
-            Não possui conta? <Text style={estilos.textoLinkDestaque}>Crie aqui</Text>
+            Não tem conta?{' '}
+            <Text style={estilos.textoLinkDestaque}>Criar agora</Text>
           </Text>
         </Pressable>
       </ScrollView>
@@ -75,62 +77,80 @@ export function LoginScreen({ aoAutenticar, aoIrParaCadastro }) {
 const estilos = StyleSheet.create({
   fundo: {
     flex: 1,
-    backgroundColor: CORES.superficie,
+    backgroundColor: CORES.branco,
   },
   container: {
     flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 80,
+    paddingHorizontal: 24,
+    paddingTop: 72,
     paddingBottom: 40,
-    justifyContent: 'center',
   },
-  cabecalho: {
-    alignItems: 'center',
-    marginBottom: 40,
+  topo: {
+    marginBottom: 48,
+  },
+  tag: {
+    alignSelf: 'flex-start',
+    backgroundColor: CORES.acento,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 4,
+    marginBottom: 18,
+  },
+  tagTexto: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 11,
+    fontWeight: '800',
+    color: CORES.preto,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
   titulo: {
     fontFamily: FONTE_PRINCIPAL,
-    color: CORES.texto,
-    fontSize: 40,
+    fontSize: 56,
     fontWeight: '900',
-    letterSpacing: 2,
+    color: CORES.preto,
+    letterSpacing: -2,
+    lineHeight: 58,
+  },
+  form: {
+    marginBottom: 8,
   },
   textoErro: {
+    fontFamily: FONTE_PRINCIPAL,
     color: CORES.vermelho,
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '600',
     marginBottom: 12,
-    textAlign: 'center',
   },
-  botaoPrincipal: {
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: CORES.verde,
+  botao: {
+    height: 56,
+    backgroundColor: CORES.acento,
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    shadowColor: CORES.verde,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
-    elevation: 5,
   },
-  textoBotaoPrincipal: {
-    color: CORES.branco,
+  textoBotao: {
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.preto,
     fontSize: 15,
     fontWeight: '900',
+    textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  linkCadastro: {
+  linkArea: {
     alignItems: 'center',
     paddingVertical: 20,
   },
   textoLink: {
-    color: CORES.textoSuave,
+    fontFamily: FONTE_PRINCIPAL,
+    color: CORES.cinzaEscuro,
     fontWeight: '600',
+    fontSize: 14,
   },
   textoLinkDestaque: {
-    color: CORES.verde,
+    color: CORES.preto,
     fontWeight: '900',
+    textDecorationLine: 'underline',
   },
 });
