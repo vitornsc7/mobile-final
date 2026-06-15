@@ -72,7 +72,7 @@ async function signin({ email, senha }) {
   validarSignin({ email, senha });
 
   const emailNormalizado = email.trim().toLowerCase();
-  const user = userRepository.findByEmail(emailNormalizado);
+  const user = await userRepository.findByEmail(emailNormalizado);
 
   if (!user || !(await bcrypt.compare(senha, user.senha))) {
     const err = new Error('E-mail ou senha inválidos');
