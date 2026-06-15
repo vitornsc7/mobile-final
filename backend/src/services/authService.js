@@ -46,7 +46,7 @@ async function signup({ nome, email, senha, dataNascimento }) {
 
   const emailNormalizado = email.trim().toLowerCase();
 
-  if (userRepository.findByEmail(emailNormalizado)) {
+  if (await userRepository.findByEmail(emailNormalizado)) {
     const err = new Error('E-mail já cadastrado');
     err.status = 409;
     throw err;
