@@ -443,26 +443,32 @@ export default function App() {
 
   if (verificandoAuth) {
     return (
-      <View style={estilos.centrado}>
-        <ActivityIndicator size="large" color={CORES.verde} />
-      </View>
+      <SafeAreaProvider>
+        <View style={estilos.centrado}>
+          <ActivityIndicator size="large" color={CORES.verde} />
+        </View>
+      </SafeAreaProvider>
     );
   }
 
   if (!usuario) {
     if (telaAuth === 'cadastro') {
       return (
-        <SignupScreen
-          aoAutenticar={aoAutenticar}
-          aoIrParaLogin={() => definirTelaAuth('login')}
-        />
+        <SafeAreaProvider>
+          <SignupScreen
+            aoAutenticar={aoAutenticar}
+            aoIrParaLogin={() => definirTelaAuth('login')}
+          />
+        </SafeAreaProvider>
       );
     }
     return (
-      <LoginScreen
-        aoAutenticar={aoAutenticar}
-        aoIrParaCadastro={() => definirTelaAuth('cadastro')}
-      />
+      <SafeAreaProvider>
+        <LoginScreen
+          aoAutenticar={aoAutenticar}
+          aoIrParaCadastro={() => definirTelaAuth('cadastro')}
+        />
+      </SafeAreaProvider>
     );
   }
 
