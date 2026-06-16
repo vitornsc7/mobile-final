@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { TelaCelular } from './src/components/TelaCelular';
 import { TelaInicio } from './src/screens/TelaInicio';
 import { TelaDespesa } from './src/screens/TelaDespesa';
@@ -27,6 +28,8 @@ export default function App() {
   const [despesaEmEdicao, definirDespesaEmEdicao] = useState(null);
   const [limiteEmEdicao, definirLimiteEmEdicao] = useState(null);
   const [mensagemErroLimite, definirMensagemErroLimite] = useState('');
+  const [mensagemErroDespesa, definirMensagemErroDespesa] = useState('');
+  const [mensagemErroGeral, definirMensagemErroGeral] = useState('');
   const [formularioDespesa, definirFormularioDespesa] = useState({
     descricao: '',
     valor: '',
@@ -59,6 +62,7 @@ export default function App() {
     if (!usuario) return;
 
     async function iniciarTela() {
+      definirMensagemErroGeral('');
       try {
         const meses = await carregarMesesCadastrados();
         if (meses.length > 0) {
@@ -71,7 +75,7 @@ export default function App() {
           definirLimites([]);
         }
       } catch (erro) {
-        Alert.alert('Erro', erro.message);
+        definirMensagemErroGeral(erro.message);
       }
     }
 
@@ -136,6 +140,7 @@ export default function App() {
       return;
     }
 
+    definirMensagemErroGeral('');
     definirCarregando(true);
 
     try {
@@ -147,13 +152,14 @@ export default function App() {
       definirDespesas(listaDespesas);
       definirLimites(listaLimites);
     } catch (erro) {
-      Alert.alert('Erro', erro.message);
+      definirMensagemErroGeral(erro.message);
     } finally {
       definirCarregando(false);
     }
   }
 
   function alterarFormularioDespesa(campo, valor) {
+    definirMensagemErroDespesa('');
     definirFormularioDespesa((atual) => ({ ...atual, [campo]: valor }));
   }
 
@@ -164,16 +170,14 @@ export default function App() {
 
   function validarMesEditavel(mesReferencia, rotuloTipo) {
     if (!validarMesReferencia(mesReferencia)) {
-      Alert.alert('Validacao', 'Use o mes no formato YYYY-MM.');
-      return false;
+      return 'Use o mês no formato YYYY-MM.';
     }
 
     if (mesReferenciaAnterior(mesReferencia)) {
-      Alert.alert('Validacao', `Nao e permitido cadastrar ou alterar ${rotuloTipo} de meses anteriores.`);
-      return false;
+      return `Não é permitido cadastrar ou alterar ${rotuloTipo} de meses anteriores.`;
     }
 
-    return true;
+    return null;
   }
 
   async function selecionarMesCadastrado(mes) {
@@ -182,6 +186,7 @@ export default function App() {
   }
 
   async function salvarDespesa() {
+    definirMensagemErroDespesa('');
     const dadosDespesa = {
       descricao: formularioDespesa.descricao.trim(),
       valor: Number(formularioDespesa.valor.replace(',', '.')),
@@ -189,17 +194,21 @@ export default function App() {
     };
 
     if (!dadosDespesa.descricao || !formularioDespesa.valor.trim() || !dadosDespesa.mesReferencia) {
-      Alert.alert('Validacao', 'Preencha descricao, valor e mes.');
+      definirMensagemErroDespesa('Preencha descrição, valor e mês.');
       return;
     }
 
     if (!Number.isFinite(dadosDespesa.valor) || dadosDespesa.valor <= 0) {
-      Alert.alert('Validacao', 'Informe um valor maior que zero.');
+      definirMensagemErroDespesa('Informe um valor maior que zero.');
       return;
     }
 
-    if (!despesaEmEdicao && !validarMesEditavel(dadosDespesa.mesReferencia, 'despesas')) {
-      return;
+    if (!despesaEmEdicao) {
+      const erroMes = validarMesEditavel(dadosDespesa.mesReferencia, 'despesas');
+      if (erroMes) {
+        definirMensagemErroDespesa(erroMes);
+        return;
+      }
     }
 
     try {
@@ -221,7 +230,7 @@ export default function App() {
       await carregarMesesCadastrados();
       await carregarDados(dadosDespesa.mesReferencia);
     } catch (erro) {
-      Alert.alert('Erro', erro.message);
+      definirMensagemErroDespesa(erro.message);
     }
   }
 
@@ -233,19 +242,20 @@ export default function App() {
 
     if (!formularioLimite.valor.trim() || !dadosLimite.mesReferencia) {
       definirMensagemErroLimite('Preencha valor e mês.');
-      Alert.alert('Validacao', 'Preencha valor e mes.');
       return;
     }
 
     if (!Number.isFinite(dadosLimite.valor) || dadosLimite.valor <= 0) {
       definirMensagemErroLimite('Informe um valor maior que zero.');
-      Alert.alert('Validacao', 'Informe um valor maior que zero.');
       return;
     }
 
-    if (!limiteEmEdicao && !validarMesEditavel(dadosLimite.mesReferencia, 'limites')) {
-      definirMensagemErroLimite('Não é permitido cadastrar limites de meses anteriores.');
-      return;
+    if (!limiteEmEdicao) {
+      const erroMes = validarMesEditavel(dadosLimite.mesReferencia, 'limites');
+      if (erroMes) {
+        definirMensagemErroLimite(erroMes);
+        return;
+      }
     }
 
     try {
@@ -261,9 +271,7 @@ export default function App() {
         const limiteJaExiste = limitesCadastrados.some((limite) => limite.mesReferencia === dadosLimite.mesReferencia);
 
         if (limiteJaExiste) {
-          const mensagem = 'Esse mês já possui um limite cadastrado. Você pode editar o limite existente.';
-          definirMensagemErroLimite(mensagem);
-          Alert.alert('Erro', mensagem);
+          definirMensagemErroLimite('Esse mês já possui um limite cadastrado. Você pode editar o limite existente.');
           return;
         }
 
@@ -280,7 +288,6 @@ export default function App() {
       await carregarDados(dadosLimite.mesReferencia);
     } catch (erro) {
       definirMensagemErroLimite(erro.message);
-      Alert.alert('Erro', erro.message);
     }
   }
 
@@ -319,23 +326,24 @@ export default function App() {
 
   async function excluirDespesa(despesa) {
     if (mesReferenciaAnterior(despesa.mesReferencia)) {
-      Alert.alert('Validacao', 'Nao e permitido excluir despesas de meses anteriores.');
+      definirMensagemErroDespesa('Não é permitido excluir despesas de meses anteriores.');
       return;
     }
 
     try {
       await requisicaoApi(`/expenses/${despesa.id}`, { method: 'DELETE' });
       definirDespesaEmEdicao(null);
+      definirMensagemErroDespesa('');
       definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: mesSelecionado || obterMesReferenciaAtual() });
       await atualizarMesAposExclusao();
     } catch (erro) {
-      Alert.alert('Erro', erro.message);
+      definirMensagemErroDespesa(erro.message);
     }
   }
 
   async function excluirLimite(limite) {
     if (mesReferenciaAnterior(limite.mesReferencia)) {
-      Alert.alert('Validacao', 'Nao e permitido excluir limites de meses anteriores.');
+      definirMensagemErroLimite('Não é permitido excluir limites de meses anteriores.');
       return;
     }
 
@@ -346,7 +354,7 @@ export default function App() {
       definirFormularioLimite({ valor: '', mesReferencia: mesSelecionado || obterMesReferenciaAtual() });
       await atualizarMesAposExclusao();
     } catch (erro) {
-      Alert.alert('Erro', erro.message);
+      definirMensagemErroLimite(erro.message);
     }
   }
 
@@ -359,6 +367,14 @@ export default function App() {
       return (
         <View style={estilos.carregando}>
           <ActivityIndicator color={CORES.verde} />
+        </View>
+      );
+    }
+
+    if (mensagemErroGeral) {
+      return (
+        <View style={estilos.carregando}>
+          <Text style={estilos.textoErroGeral}>{mensagemErroGeral}</Text>
         </View>
       );
     }
@@ -386,12 +402,14 @@ export default function App() {
           despesas={despesas}
           formularioDespesa={formularioDespesa}
           despesaEmEdicao={despesaEmEdicao}
+          mensagemErro={mensagemErroDespesa}
           aoAlterarFormulario={alterarFormularioDespesa}
           aoSalvar={salvarDespesa}
           aoEditar={editarDespesa}
           aoExcluir={excluirDespesa}
           aoCancelarEdicao={() => {
             definirDespesaEmEdicao(null);
+            definirMensagemErroDespesa('');
             definirFormularioDespesa({ descricao: '', valor: '', mesReferencia: mesSelecionado || obterMesReferenciaAtual() });
           }}
         />
@@ -449,9 +467,11 @@ export default function App() {
   }
 
   return (
-    <TelaCelular telaAtiva={telaAtiva} aoTrocarTela={trocarTela}>
-      {renderizarTela()}
-    </TelaCelular>
+    <SafeAreaProvider>
+      <TelaCelular telaAtiva={telaAtiva} aoTrocarTela={trocarTela}>
+        {renderizarTela()}
+      </TelaCelular>
+    </SafeAreaProvider>
   );
 }
 
@@ -460,6 +480,14 @@ const estilos = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  textoErroGeral: {
+    fontFamily: 'System',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#b91c1c',
+    textAlign: 'center',
+    paddingHorizontal: 24,
   },
   centrado: {
     flex: 1,

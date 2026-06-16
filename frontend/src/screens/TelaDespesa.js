@@ -13,6 +13,7 @@ export function TelaDespesa({
   despesas,
   formularioDespesa,
   despesaEmEdicao,
+  mensagemErro,
   aoAlterarFormulario,
   aoSalvar,
   aoEditar,
@@ -50,6 +51,7 @@ export function TelaDespesa({
           dica="Ex: 150.00"
           tipoTeclado="numeric"
         />
+        {Boolean(mensagemErro) && <Text style={estilos.mensagemErro}>{mensagemErro}</Text>}
         <View style={estilos.campo}>
           <Text style={estilos.rotuloCampo}>Mês de referência</Text>
           <SeletorMesAno
@@ -340,5 +342,18 @@ const estilos = StyleSheet.create({
     fontSize: 15,
     fontWeight: '900',
     color: CORES.preto,
+  },
+  mensagemErro: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 13,
+    fontWeight: '600',
+    color: CORES.vermelhoEscuro,
+    backgroundColor: CORES.vermelhoClaro,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: CORES.vermelho,
+    marginBottom: 12,
   },
 });

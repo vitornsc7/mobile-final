@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NavegacaoInferior } from './NavegacaoInferior';
 import { CORES } from '../theme/colors';
 

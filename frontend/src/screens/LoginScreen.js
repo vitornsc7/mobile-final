@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Campo } from '../components/Campo';
 import { CORES } from '../theme/colors';
 import { FONTE_PRINCIPAL } from '../theme/typography';
@@ -34,6 +35,7 @@ export function LoginScreen({ aoAutenticar, aoIrParaCadastro }) {
     <SafeAreaView style={estilos.fundo}>
       <ScrollView contentContainerStyle={estilos.container} keyboardShouldPersistTaps="handled">
         <View style={estilos.topo}>
+          <Text style={estilos.logo}>My Economy</Text>
           <View style={estilos.tag}>
             <Text style={estilos.tagTexto}>Finanças pessoais</Text>
           </View>
@@ -111,6 +113,14 @@ const estilos = StyleSheet.create({
     color: CORES.preto,
     letterSpacing: -2,
     lineHeight: 58,
+  },
+  logo: {
+    fontFamily: FONTE_PRINCIPAL,
+    fontSize: 24,
+    fontWeight: '900',
+    marginBottom: 4,
+    color: CORES.preto,
+    letterSpacing: -2,
   },
   form: {
     marginBottom: 8,
